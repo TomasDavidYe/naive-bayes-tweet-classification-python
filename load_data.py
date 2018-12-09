@@ -1,5 +1,7 @@
 import pandas as pd
+import re
 
+regex = re.compile('[^a-zA-Z ]')
 replace_dictionary = {
     'č': 'c',
     'š': 's',
@@ -16,28 +18,32 @@ replace_dictionary = {
     'ň': 'n',
     'ť': 't',
     'ď': 'd',
-    'Ě': 'E',
-    'Š': 'S',
-    'Č': 'C',
-    'Ř': 'R',
-    'Ž': 'Z',
-    'Ý': 'Y',
-    'Á': 'A',
-    'Í': 'I',
-    'É': 'E',
-    'Ú': 'U',
-    'Ů': 'U',
-    'Ň': 'N',
-    'Ť': 'T',
-    'Ď': 'D',
+    # 'Ě': 'E',
+    # 'Š': 'S',
+    # 'Č': 'C',
+    # 'Ř': 'R',
+    # 'Ž': 'Z',
+    # 'Ý': 'Y',
+    # 'Á': 'A',
+    # 'Í': 'I',
+    # 'É': 'E',
+    # 'Ú': 'U',
+    # 'Ů': 'U',
+    # 'Ň': 'N',
+    # 'Ť': 'T',
+    # 'Ď': 'D',
+
 }
 
 
 def clear_diacritics_from(sentence):
     if isinstance(sentence, str):
+        sentence = sentence.lower()
         for key in replace_dictionary.keys():
             sentence = sentence.replace(key, replace_dictionary[key])
-        return sentence
+        return regex.sub('', sentence)
+
+
 
 
 def clear_diacritics_from_columns(data, column_names):
@@ -47,17 +53,8 @@ def clear_diacritics_from_columns(data, column_names):
     return result
 
 
-dataset = pd.read_excel('data.xlsm')
-columns_names_with_text = ['Obsah zmínek', 'Kontext']
-dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
-column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
-dataset.drop(columns=column_name_for_dropping, inplace=True)
-categories = set(dataset['Štítek'].unique())
-print('Before merging')
-print(dataset['Štítek'].value_counts())
-
-
 def map_category_to_relevance(category):
+    categories = set(dataset['Štítek'].unique())
     relevant_categories = categories - set(['nerelevantní'])
     if category in relevant_categories:
         return 'rel'
@@ -65,10 +62,11 @@ def map_category_to_relevance(category):
         return 'nerel'
 
 
+dataset = pd.read_excel('data.xlsm')
+columns_names_with_text = ['Obsah zmínek', 'Kontext']
+dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
+column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
+dataset.drop(columns=column_name_for_dropping, inplace=True)
 dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x))
-print('After merging')
-print(dataset['Štítek'].value_counts())
-
 
 dataset.to_csv('cleaner_data.csv')
-
