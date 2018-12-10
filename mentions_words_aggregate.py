@@ -1,32 +1,18 @@
 import pandas as pd
 
 
-def get_word_count_rel_mentions(word):
-    return 1
+ABSOLUTE_FREQUENCY = 'absolute_frequency'
+WORD_TEXT = 'word_text'
+MENTIONS_CSV = 'counts_in_mentions.csv'
+STITEK = 'Štítek'
+OBSAH_ZMINKY = 'Obsah zmínek'
+CLEANER_DATA_CSV = 'cleaner_data.csv'
 
+dataset = pd.read_csv(CLEANER_DATA_CSV)
+mentions_with_relevance = dataset[[OBSAH_ZMINKY, STITEK]].dropna()
+words_in_mentions = pd.read_csv(MENTIONS_CSV)
+words_in_mentions.columns = [WORD_TEXT, ABSOLUTE_FREQUENCY]
 
-def get_word_count_in_nerel_mentions(word):
-    return 2
-
-
-def get_word_count_in_rel_contexts(word):
-    return 3
-
-
-def get_word_count_in_nerel_contexts(word):
-    return 4
-
-
-def get_word_rank_absolute(word):
-    return 5
-
-
-def get_word_rank_rel(word):
-    return 6
-
-
-def get_word_rank_nerel(word):
-    return 7
 
 
 def check_if_word_is_in_text(text, word):
@@ -44,26 +30,36 @@ def check_if_word_is_in_irrelevant_text(text, word, relevance):
     return check_if_word_is_in_text(text, word) and relevance == 'nerel'
 
 
-dataset = pd.read_csv('cleaner_data.csv')
-mentions_with_relevance = dataset[['Obsah zmínek', 'Štítek']].dropna()
-words_in_mentions = pd.read_csv('counts_in_mentions.csv')
-words_in_mentions.columns = ['word_text', 'absolute_frequency']
+def get_word_count_in_rel_mentions(word):
+    selection = mentions_with_relevance.apply(func=lambda x: check_if_word_is_in_relevant_text(word=word,
+                                                                                               text=x[OBSAH_ZMINKY],
+                                                                                               relevance=x[STITEK]),
+                                              axis=1)
+    return len(mentions_with_relevance.loc[selection, :])
 
-selection1 = mentions_with_relevance.apply(func=lambda x: check_if_word_is_in_text(word='usa', text=x['Obsah zmínek']) ,axis=1)
-test1 = mentions_with_relevance.loc[selection1, :]
-len(test1)
-selection2 = mentions_with_relevance.apply(func=lambda x: check_if_word_is_in_relevant_text(word='usa',
-                                                                                            text=x['Obsah zmínek'],
-                                                                                            relevance=x['Štítek']),
-                                           axis=1)
-test2 = mentions_with_relevance.loc[selection2, :]
 
-selection3 = mentions_with_relevance.apply(func=lambda x: check_if_word_is_in_irrelevant_text(word='usa',
-                                                                                            text=x['Obsah zmínek'],
-                                                                                            relevance=x['Štítek']),
-                                           axis=1)
-test3 = mentions_with_relevance.loc[selection3, :]
-len(test1)
-len(test2)
-len(test3)
+def get_word_count_in_nerel_mentions(word):
+    selection = mentions_with_relevance.apply(func=lambda x: check_if_word_is_in_irrelevant_text(word=word,
+                                                                                                 text=x[OBSAH_ZMINKY],
+                                                                                                 relevance=x[STITEK]),
+                                              axis=1)
+    return len(mentions_with_relevance.loc[selection, :])
 
+def get_aggreate_matrix_with_first_n_words(n):
+    AGGREGATE_COLUMNS = ['rank', 'word_text', 'absolute_count', 'word_count_zminka_rel', 'word_count_zminka_nerel']
+    top_words = words_in_mentions.loc[:n, :]
+    aggregate_matrix = pd.DataFrame(data=[], columns=AGGREGATE_COLUMNS)
+    aggregate_matrix.shape
+    word = None
+    for rank, word_field in enumerate(top_words.values):
+        word = list(word_field)[0]
+        count = list(word_field)[1]
+        row = pd.Series(index=AGGREGATE_COLUMNS,
+                        data=[rank + 1, word, count, get_word_count_in_rel_mentions(word),
+                              get_word_count_in_nerel_mentions(word)],
+                        )
+        aggregate_matrix = aggregate_matrix.append(row, ignore_index=True)
+
+
+
+get_aggreate_matrix_with_first_n_words(100)
