@@ -62,11 +62,11 @@ def map_category_to_relevance(category):
         return 'nerel'
 
 
-dataset = pd.read_excel('data.xlsm')
+dataset = pd.read_excel('resources/data.xlsm')
 columns_names_with_text = ['Obsah zmínek', 'Kontext']
 dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
 column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
 dataset.drop(columns=column_name_for_dropping, inplace=True)
 dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x))
 
-dataset.to_csv('cleaner_data.csv')
+dataset.to_csv('resources/cleaner_data.csv')
