@@ -18,21 +18,6 @@ replace_dictionary = {
     'ň': 'n',
     'ť': 't',
     'ď': 'd',
-    # 'Ě': 'E',
-    # 'Š': 'S',
-    # 'Č': 'C',
-    # 'Ř': 'R',
-    # 'Ž': 'Z',
-    # 'Ý': 'Y',
-    # 'Á': 'A',
-    # 'Í': 'I',
-    # 'É': 'E',
-    # 'Ú': 'U',
-    # 'Ů': 'U',
-    # 'Ň': 'N',
-    # 'Ť': 'T',
-    # 'Ď': 'D',
-
 }
 
 
@@ -62,11 +47,11 @@ def map_category_to_relevance(category):
         return 'nerel'
 
 
-dataset = pd.read_excel('resources/data.xlsm')
+dataset = pd.read_excel('resources/general_data/data.xlsm')
 columns_names_with_text = ['Obsah zmínek', 'Kontext']
 dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
 column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
 dataset.drop(columns=column_name_for_dropping, inplace=True)
 dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x))
 
-dataset.to_csv('resources/cleaner_data.csv')
+dataset.to_csv('resources/general_data/cleaner_data.csv')

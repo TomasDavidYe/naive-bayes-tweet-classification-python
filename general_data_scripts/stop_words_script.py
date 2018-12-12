@@ -42,4 +42,5 @@ def get_custom_stop_words():
     return stop_words_cz
 
 
-pd.Series(data=get_custom_stop_words(), name='Stop_words').to_csv('resources/stop_words.csv')
+def save_stopwords_to_file():
+    pd.Series(data=get_custom_stop_words(), name='Stop_words').to_csv('resources/stop_words.csv')
