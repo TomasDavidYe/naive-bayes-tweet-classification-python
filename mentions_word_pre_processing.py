@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from load_data import clear_diacritics_from
 from stop_words import get_stop_words
 
+print('Creating stop words list')
 stop_words_cz = get_stop_words('czech')
 for index, value in enumerate(stop_words_cz):
     stop_words_cz[index] = clear_diacritics_from(value)
@@ -86,9 +87,7 @@ def vectorize():
     indicator_matrix.drop(index=[RELEVANT], inplace=True)
     indicator_matrix_for_irrelevance.drop(index=[RELEVANT], inplace=True)
     indicator_matrix_for_relevance.drop(index=[RELEVANT], inplace=True)
-    indicator_matrix.shape
-    indicator_matrix_for_relevance.shape
-    indicator_matrix_for_irrelevance.shape
+
     print('Summing counts...')
     # TODO optimize with matrix multiplication
     absolute_occurrence_count = feature_matrix.apply(func=np.sum, axis=1)
@@ -100,6 +99,14 @@ def vectorize():
     occurrences_in_all_mentions_count.sort_values(inplace=True, ascending=False)
     occurrences_in_rel_mentions_count.sort_values(inplace=True, ascending=False)
     occrrences_in_nerel_mentions_count.sort_values(inplace=True, ascending=False)
+
+    print('Adding headers')
+    columns = ['word_text', 'count']
+    absolute_occurrence_count.columns = columns
+    occurrences_in_all_mentions_count.columns = columns
+    occurrences_in_rel_mentions_count.columns = columns
+    occrrences_in_nerel_mentions_count.columns = columns
+
     print('Saving...')
     absolute_occurrence_count.to_csv('resources/absolute_occurrence_count.csv')
     occurrences_in_all_mentions_count.to_csv('resources/occurrences_in_all_mentions_count.csv')
@@ -107,3 +114,9 @@ def vectorize():
     occrrences_in_nerel_mentions_count.to_csv('resources/occurrences_in_nerel_mentions_count.csv')
 
 vectorize()
+
+
+matrix = pd.DataFrame([[1,2],[3,4],[5,6]])
+matrix
+matrix.shape[0]
+matrix.shape[1]
