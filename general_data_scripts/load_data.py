@@ -2,39 +2,43 @@ import pandas as pd
 import re
 
 regex = re.compile('[^a-zA-Z ]')
-replace_dictionary = {
-    'č': 'c',
-    'š': 's',
-    'ř': 'r',
-    'ž': 'z',
-    'ě': 'e',
-    'é': 'e',
-    'ý': 'y',
-    'á': 'a',
-    'í': 'i',
-    'ó': 'o',
-    'ů': 'u',
-    'ú': 'u',
-    'ň': 'n',
-    'ť': 't',
-    'ď': 'd',
-}
+
+
+def get_replace_dictionary():
+    return {
+        'č': 'c',
+        'š': 's',
+        'ř': 'r',
+        'ž': 'z',
+        'ě': 'e',
+        'é': 'e',
+        'ý': 'y',
+        'á': 'a',
+        'í': 'i',
+        'ó': 'o',
+        'ů': 'u',
+        'ú': 'u',
+        'ň': 'n',
+        'ť': 't',
+        'ď': 'd',
+    }
 
 
 def clear_diacritics_from(sentence):
+    replace_dictionary = get_replace_dictionary()
     if isinstance(sentence, str):
         sentence = sentence.lower()
         for key in replace_dictionary.keys():
             sentence = sentence.replace(key, replace_dictionary[key])
-        return regex.sub('', sentence)
-
-
+        return sentence
+    else:
+        return ''
 
 
 def clear_diacritics_from_columns(data, column_names):
     result = data.copy()
     for column_name in column_names:
-        result[column_name] = result[column_name].apply(lambda x: clear_diacritics_from(x))
+        result[column_name] = result[column_name].apply(lambda x: regex.sub('', clear_diacritics_from(x)))
     return result
 
 
