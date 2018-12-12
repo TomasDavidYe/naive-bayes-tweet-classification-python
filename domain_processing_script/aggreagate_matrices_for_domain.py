@@ -1,0 +1,7 @@
+from helper_methods import get_column_name_dictionary, create_simple_aggregate_matrix_for
+
+
+aggregate_matrix_domain = create_simple_aggregate_matrix_for('domain')
+aggregate_matrix_domaingroup = create_simple_aggregate_matrix_for('domaingroup')
+aggregate_matrix_domain.to_csv('resources/matrices/aggregate_matrix_domain_12_12_2018.csv')
+aggregate_matrix_domaingroup .to_csv('resources/matrices/aggregate_matrix_domaingroup_12_12_2018.csv')
