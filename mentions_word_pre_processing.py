@@ -1,45 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-from load_data import clear_diacritics_from
-from stop_words import get_stop_words
+from stop_words_script import get_custom_stop_words
 
 print('Creating stop words list')
-stop_words_cz = get_stop_words('czech')
-for index, value in enumerate(stop_words_cz):
-    stop_words_cz[index] = clear_diacritics_from(value)
-stop_words_cz += [
-    'by',
-    'take',
-    'si',
-    'pokud',
-    'tomto',
-    'az',
-    'nej',
-    'dalsi',
-    'aby',
-    'byt',
-    'mel',
-    'sve',
-    'tom',
-    'ani',
-    'ho',
-    'ji',
-    'tomu',
-    'zatim',
-    'jako',
-    'toho',
-    'tim',
-    'tu',
-    'pri',
-    'proto',
-    'bych',
-    'mu',
-    'pod',
-    'coz',
-    'jiz',
-    'tech'
-]
+stop_words_cz = get_custom_stop_words()
 
 
 def create_feature_matrix(matrix, tokens) -> pd.DataFrame:
@@ -47,7 +12,6 @@ def create_feature_matrix(matrix, tokens) -> pd.DataFrame:
     return pd.DataFrame(data=matrix, index=doc_names, columns=tokens).transpose()
 
 
-# TODO implement these methods so that the feature matrix can be created more easily
 def get_indicator_matrix(feature_matrix):
     return feature_matrix.apply(lambda x: x > 0).astype(dtype=int)
 
@@ -114,9 +78,3 @@ def vectorize():
     occrrences_in_nerel_mentions_count.to_csv('resources/occurrences_in_nerel_mentions_count.csv')
 
 vectorize()
-
-
-matrix = pd.DataFrame([[1,2],[3,4],[5,6]])
-matrix
-matrix.shape[0]
-matrix.shape[1]

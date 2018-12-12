@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 
 abs_count = pd.read_csv('resources/absolute_occurrence_count.csv')
@@ -7,7 +6,6 @@ count = pd.read_csv('resources/occurrences_in_all_mentions_count.csv')
 rel_count = pd.read_csv('resources/occurrences_in_rel_mentions_count.csv')
 nerel_count = pd.read_csv('resources/occurrences_in_nerel_mentions_count.csv')
 
-abs_count.index[abs_count['word_text'] == 'hovno'][0]
 ranked_abs = abs_count.rank(numeric_only=True, ascending=False)
 ranked = count.rank(numeric_only=True, ascending=False)
 ranked_rel = rel_count.rank(numeric_only=True, ascending=False)
@@ -52,7 +50,7 @@ columns = [
     'word_zminka_rank_nerel'
 ]
 
-N = 500;
+N = 5000;
 aggregation_matrix_words = pd.DataFrame(data=[], columns=columns)
 top_words = count.loc[:N, :]
 for i, word_field in enumerate(top_words.values):
