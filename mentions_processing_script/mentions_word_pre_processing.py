@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-from stop_words_script import get_custom_stop_words
+from general_data_scripts.stop_words_script import get_stop_words_new
 
 print('Creating stop words list')
-stop_words_cz = get_custom_stop_words()
+stop_words_cz = get_stop_words_new()
 
 
 def create_feature_matrix(matrix, tokens) -> pd.DataFrame:
@@ -36,7 +36,7 @@ def tag_with_relevance(mention, relevance):
 
 def vectorize():
     print('Loading...')
-    dataset = pd.read_csv('resources/general_data/cleaner_data.csv')
+    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv')
     mentions = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
     vectorizer = CountVectorizer(stop_words=stop_words_cz)
     print('Fitting...')
@@ -72,9 +72,9 @@ def vectorize():
     occrrences_in_nerel_mentions_count.columns = columns
 
     print('Saving...')
-    absolute_occurrence_count.to_csv('resources/mentions/absolute_occurrence_count.csv')
-    occurrences_in_all_mentions_count.to_csv('resources/mentions/occurrences_in_all_mentions_count.csv')
-    occurrences_in_rel_mentions_count.to_csv('resources/mentions/occurrences_in_rel_mentions_count.csv')
-    occrrences_in_nerel_mentions_count.to_csv('resources/mentions/occurrences_in_nerel_mentions_count.csv')
+    absolute_occurrence_count.to_csv('../resources/mentions/absolute_occurrence_count.csv')
+    occurrences_in_all_mentions_count.to_csv('../resources/mentions/occurrences_in_all_mentions_count.csv')
+    occurrences_in_rel_mentions_count.to_csv('../resources/mentions/occurrences_in_rel_mentions_count.csv')
+    occrrences_in_nerel_mentions_count.to_csv('../resources/mentions/occurrences_in_nerel_mentions_count.csv')
 
 vectorize()

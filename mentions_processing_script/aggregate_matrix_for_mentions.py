@@ -1,9 +1,9 @@
 import pandas as pd
 
-abs_count = pd.read_csv('resources/mentions/absolute_occurrence_count.csv')
-count = pd.read_csv('resources/mentions/occurrences_in_all_mentions_count.csv')
-rel_count = pd.read_csv('resources/mentions/occurrences_in_rel_mentions_count.csv')
-nerel_count = pd.read_csv('resources/mentions/occurrences_in_nerel_mentions_count.csv')
+abs_count = pd.read_csv('../resources/mentions/absolute_occurrence_count.csv', names=['word_text', 'count'])
+count = pd.read_csv('../resources/mentions/occurrences_in_all_mentions_count.csv', names=['word_text', 'count'])
+rel_count = pd.read_csv('../resources/mentions/occurrences_in_rel_mentions_count.csv', names=['word_text', 'count'])
+nerel_count = pd.read_csv('../resources/mentions/occurrences_in_nerel_mentions_count.csv', names=['word_text', 'count'])
 
 ranked_abs = abs_count.rank(numeric_only=True, ascending=False)
 ranked = count.rank(numeric_only=True, ascending=False)
@@ -63,7 +63,4 @@ for i, word_field in enumerate(top_words.values):
     aggregation_matrix_words = aggregation_matrix_words.append(row, ignore_index=True)
 
 
-aggregation_matrix_words.to_csv('resources/matrices/aggregation_matrix_words.csv')
-
-
-
+aggregation_matrix_words.to_csv('../resources/matrices/aggregation_matrix_words.csv')
