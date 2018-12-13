@@ -64,13 +64,6 @@ def vectorize():
     occurrences_in_rel_mentions_count.sort_values(inplace=True, ascending=False)
     occrrences_in_nerel_mentions_count.sort_values(inplace=True, ascending=False)
 
-    print('Adding headers')
-    columns = ['word_text', 'count']
-    absolute_occurrence_count.columns = columns
-    occurrences_in_all_mentions_count.columns = columns
-    occurrences_in_rel_mentions_count.columns = columns
-    occrrences_in_nerel_mentions_count.columns = columns
-
     print('Saving...')
     absolute_occurrence_count.to_csv('../resources/mentions/absolute_occurrence_count.csv')
     occurrences_in_all_mentions_count.to_csv('../resources/mentions/occurrences_in_all_mentions_count.csv')
