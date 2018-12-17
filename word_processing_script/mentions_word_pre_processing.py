@@ -84,16 +84,16 @@ def vectorize(ratio=1.0):
     archive_matrix(absolute_occurrence_count, 'occurrences_count_nerel', ratio )
 
     print('Updating latest')
-    dir_name = '../resources/mentions/latest'
-    absolute_occurrence_count.to_csv('../resources/mentions/latest/occurrences_count_absolute.csv')
-    occurrences_in_all_mentions_count.to_csv('../resources/mentions/latest/occurrences_count_all.csv')
-    occurrences_in_rel_mentions_count.to_csv('../resources/mentions/latest/occurrences_count_rel.csv')
-    occrrences_in_nerel_mentions_count.to_csv('../resources/mentions/latest/occurrences_count_nerel.csv')
+    dir_name = '../resources/word_vectorization_matrices/latest/occurrences_count_'
+    absolute_occurrence_count.to_csv(dir_name + 'absolute.csv')
+    occurrences_in_all_mentions_count.to_csv(dir_name + 'all.csv')
+    occurrences_in_rel_mentions_count.to_csv(dir_name + 'rel.csv')
+    occrrences_in_nerel_mentions_count.to_csv(dir_name + 'nerel.csv')
 
 
 def archive_matrix(matrix, file_name, ratio):
     time = datetime.datetime.now().strftime('%c').replace(' ', '_')
-    dir_name = '../resources/mentions/' + time
+    dir_name = '../resources/word_vectorization_matrices/' + time
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
     suffix = '_ratio_' + str(ratio) + '_time_' + time + '.csv'
@@ -101,5 +101,5 @@ def archive_matrix(matrix, file_name, ratio):
     matrix.to_csv(path)
 
 
-vectorize(0.8)
+vectorize(1)
 
