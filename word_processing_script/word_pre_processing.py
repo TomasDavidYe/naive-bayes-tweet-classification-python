@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 import datetime
 from sklearn.feature_extraction.text import CountVectorizer
-from helper_methods import get_stop_words_new
+from helper_methods import get_stop_words
 import os
 
 print('Creating stop words list')
-stop_words_cz = get_stop_words_new()
+stop_words_cz = get_stop_words()
 
 
 def create_feature_matrix(matrix, tokens) -> pd.DataFrame:
