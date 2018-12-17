@@ -1,4 +1,4 @@
-from helper_methods import get_column_name_dictionary, create_simple_aggregate_matrix_for
+from helper_methods import get_column_names_for_simple_matrix_dictionary, create_simple_aggregate_matrix_for
 
 
 aggregate_matrix_domain = create_simple_aggregate_matrix_for('domain')

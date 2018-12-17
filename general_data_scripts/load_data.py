@@ -45,3 +45,6 @@ def load_and_clean_data():
 
 def save_cleaner_data():
     load_and_clean_data().to_csv('../resources/general_data/cleaner_data.csv')
+
+
+print(load_and_clean_data()['Štítek'])

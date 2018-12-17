@@ -1,8 +1,14 @@
 import pandas as pd
 
+def get_stop_words_new():
+    stop_words_new = pd.read_excel('resources/general_data/stop_words_13_12_2018.xlsx')['word'].to_dict().values()
+    result = list(set(stop_words_new))
+    result.sort()
+    return result
+
 
 def create_simple_aggregate_matrix_for(variable_name):
-    column_name = get_column_name_dictionary().get(variable_name)
+    column_name = get_column_names_for_simple_matrix_dictionary().get(variable_name)
     data = pd.read_csv('resources/general_data/cleaner_data.csv')[[column_name, 'Štítek']].dropna(subset=[column_name])
     value_counts = data[column_name].value_counts()
     values = value_counts.keys()
@@ -19,7 +25,7 @@ def create_simple_aggregate_matrix_for(variable_name):
     return aggregate_matrix
 
 
-def get_column_name_dictionary():
+def get_column_names_for_simple_matrix_dictionary():
     return {
         'domain': 'Doména',
         'domaingroup': 'Skupina domén',

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-from general_data_scripts.stop_words_script import get_stop_words_new
+from helper_methods import get_stop_words_new
 
 print('Creating stop words list')
 stop_words_cz = get_stop_words_new()
