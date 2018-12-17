@@ -25,6 +25,25 @@ def get_column_name_dictionary():
         'domaingroup': 'Skupina domén',
     }
 
+def get_replace_dictionary():
+    return {
+        'č': 'c',
+        'š': 's',
+        'ř': 'r',
+        'ž': 'z',
+        'ě': 'e',
+        'é': 'e',
+        'ý': 'y',
+        'á': 'a',
+        'í': 'i',
+        'ó': 'o',
+        'ů': 'u',
+        'ú': 'u',
+        'ň': 'n',
+        'ť': 't',
+        'ď': 'd',
+    }
+
 
 def get_column_names_for_dropping():
     return [
@@ -43,14 +62,3 @@ def get_column_names_for_dropping():
         'Geolokace'
     ]
 
-
-
-A = pd.DataFrame(data=[[1, 2],
-                       [4, 5],
-                       [7, 8]],
-                 index=['R1', 'R2', 'R3'],
-                 columns=['C1', 'C2'])
-
-
-A.shape
-len(A)

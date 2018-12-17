@@ -1,27 +1,8 @@
 import pandas as pd
 import re
+from helper_methods import get_replace_dictionary
 
-regex = re.compile('[^a-zA-Z ]')
 
-
-def get_replace_dictionary():
-    return {
-        'č': 'c',
-        'š': 's',
-        'ř': 'r',
-        'ž': 'z',
-        'ě': 'e',
-        'é': 'e',
-        'ý': 'y',
-        'á': 'a',
-        'í': 'i',
-        'ó': 'o',
-        'ů': 'u',
-        'ú': 'u',
-        'ň': 'n',
-        'ť': 't',
-        'ď': 'd',
-    }
 
 
 def clear_diacritics_from(sentence):
@@ -36,14 +17,14 @@ def clear_diacritics_from(sentence):
 
 
 def clear_diacritics_from_columns(data, column_names):
+    regex = re.compile('[^a-zA-Z ]')
     result = data.copy()
     for column_name in column_names:
         result[column_name] = result[column_name].apply(lambda x: regex.sub('', clear_diacritics_from(x)))
     return result
 
 
-def map_category_to_relevance(category):
-    categories = set(dataset['Štítek'].unique())
+def map_category_to_relevance(category, categories):
     relevant_categories = categories - set(['nerelevantní'])
     if category in relevant_categories:
         return 'rel'
@@ -51,11 +32,16 @@ def map_category_to_relevance(category):
         return 'nerel'
 
 
-dataset = pd.read_excel('../resources/general_data/data.xlsm')
-columns_names_with_text = ['Obsah zmínek', 'Kontext', 'Klíčová slova']
-dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
-column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
-dataset.drop(columns=column_name_for_dropping, inplace=True)
-dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x))
+def load_and_clean_data():
+    dataset = pd.read_excel('../resources/general_data/data.xlsm')
+    columns_names_with_text = ['Obsah zmínek', 'Kontext', 'Klíčová slova']
+    dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
+    categories = set(dataset['Štítek'].unique())
+    column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
+    dataset.drop(columns=column_name_for_dropping, inplace=True)
+    dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x, categories))
+    return dataset
 
-dataset.to_csv('../resources/general_data/cleaner_data.csv')
+
+def save_cleaner_data():
+    load_and_clean_data().to_csv('../resources/general_data/cleaner_data.csv')
