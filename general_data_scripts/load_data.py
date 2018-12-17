@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from helper_methods import get_replace_dictionary
+import datetime
 
 
 
@@ -44,7 +45,5 @@ def load_and_clean_data():
 
 
 def save_cleaner_data():
-    load_and_clean_data().to_csv('../resources/general_data/cleaner_data.csv')
+    load_and_clean_data().to_csv('../resources/general_data/cleaner_data.csv_' + datetime.datetime.now().strftime('%c'))
 
-
-print(load_and_clean_data()['Štítek'])

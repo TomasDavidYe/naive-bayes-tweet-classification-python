@@ -1,7 +1,20 @@
 import pandas as pd
 
+
+def get_columns_for_word_aggregate_matrix():
+    return [
+        'word_text',
+        'word_count_zminka',
+        'word_count_zminka_rel',
+        'word_count_zminka_nerel',
+        'word_zminka_rank',
+        'word_zminka_rank_rel',
+        'word_zminka_rank_nerel'
+    ]
+
+
 def get_stop_words_new():
-    stop_words_new = pd.read_excel('resources/general_data/stop_words_13_12_2018.xlsx')['word'].to_dict().values()
+    stop_words_new = pd.read_excel('../resources/general_data/stop_words_13_12_2018.xlsx')['word'].to_dict().values()
     result = list(set(stop_words_new))
     result.sort()
     return result

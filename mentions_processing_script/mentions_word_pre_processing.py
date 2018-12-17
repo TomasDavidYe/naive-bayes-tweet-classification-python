@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
+import datetime
 from sklearn.feature_extraction.text import CountVectorizer
 from helper_methods import get_stop_words_new
+import os
 
 print('Creating stop words list')
 stop_words_cz = get_stop_words_new()
@@ -34,19 +36,29 @@ def tag_with_relevance(mention, relevance):
         return mention
 
 
-def vectorize():
+def get_data_for_vectorization(ratio):
     print('Loading...')
     dataset = pd.read_csv('../resources/general_data/cleaner_data.csv')
-    mentions = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
+    train_length = int(len(dataset) * ratio)
+    temp = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
+    train_set = temp[:train_length]
+    test_set = temp[train_length:]
+    return [train_set, test_set]
+
+
+def vectorize(ratio=1.0):
+    [mentions_train, mentions_test] = get_data_for_vectorization(ratio)
     vectorizer = CountVectorizer(stop_words=stop_words_cz)
     print('Fitting...')
-    matrix_raw = vectorizer.fit_transform(mentions).todense()
+    matrix_raw = vectorizer.fit_transform(mentions_train).todense()
     print('Making matrices...')
     feature_names = vectorizer.get_feature_names()
     feature_matrix = create_feature_matrix(matrix_raw, feature_names)
     indicator_matrix = get_indicator_matrix(feature_matrix)
     indicator_matrix_for_relevance = get_relevance_indicator_matrix(indicator_matrix)
     indicator_matrix_for_irrelevance = get_irrelevance_indicator_matrix(indicator_matrix)
+
+    print('Dropping unnecessary row')
     feature_matrix.drop(index=[RELEVANT], inplace=True)
     indicator_matrix.drop(index=[RELEVANT], inplace=True)
     indicator_matrix_for_irrelevance.drop(index=[RELEVANT], inplace=True)
@@ -64,10 +76,30 @@ def vectorize():
     occurrences_in_rel_mentions_count.sort_values(inplace=True, ascending=False)
     occrrences_in_nerel_mentions_count.sort_values(inplace=True, ascending=False)
 
-    print('Saving...')
-    absolute_occurrence_count.to_csv('../resources/mentions/absolute_occurrence_count.csv')
-    occurrences_in_all_mentions_count.to_csv('../resources/mentions/occurrences_in_all_mentions_count.csv')
-    occurrences_in_rel_mentions_count.to_csv('../resources/mentions/occurrences_in_rel_mentions_count.csv')
-    occrrences_in_nerel_mentions_count.to_csv('../resources/mentions/occurrences_in_nerel_mentions_count.csv')
 
-vectorize()
+    print('Archiving')
+    archive_matrix(absolute_occurrence_count, 'occurrences_count_absolute', ratio )
+    archive_matrix(absolute_occurrence_count, 'occurrences_count_all', ratio )
+    archive_matrix(absolute_occurrence_count, 'occurrences_count_rel', ratio )
+    archive_matrix(absolute_occurrence_count, 'occurrences_count_nerel', ratio )
+
+    print('Updating latest')
+    dir_name = '../resources/mentions/latest'
+    absolute_occurrence_count.to_csv('../resources/mentions/latest/occurrences_count_absolute.csv')
+    occurrences_in_all_mentions_count.to_csv('../resources/mentions/latest/occurrences_count_all.csv')
+    occurrences_in_rel_mentions_count.to_csv('../resources/mentions/latest/occurrences_count_rel.csv')
+    occrrences_in_nerel_mentions_count.to_csv('../resources/mentions/latest/occurrences_count_nerel.csv')
+
+
+def archive_matrix(matrix, file_name, ratio):
+    time = datetime.datetime.now().strftime('%c').replace(' ', '_')
+    dir_name = '../resources/mentions/' + time
+    if not os.path.exists(dir_name):
+        os.mkdir(dir_name)
+    suffix = '_ratio_' + str(ratio) + '_time_' + time + '.csv'
+    path = os.path.join(dir_name, file_name + suffix)
+    matrix.to_csv(path)
+
+
+vectorize(0.8)
+
