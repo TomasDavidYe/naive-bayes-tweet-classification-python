@@ -54,7 +54,8 @@ def create_matrix_with_top_n_words(n):
                             get_rank_nerel(word)
                         ])
         aggregation_matrix_words = aggregation_matrix_words.append(row, ignore_index=True)
-    aggregation_matrix_words.to_csv('../resources/matrices/aggregation_matrix_words.csv')
-    aggregation_matrix_words.to_csv('../resources/matrices/aggregation_matrix_words.csv')
+    time = datetime.datetime.now().strftime('%c').replace(' ', '_')
+    aggregation_matrix_words.to_csv('../resources/aggregation_matrices/words/aggregation_matrix_words_' + time + '.csv')
 
 
+create_matrix_with_top_n_words(20)
