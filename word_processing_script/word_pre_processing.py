@@ -66,29 +66,36 @@ def vectorize(ratio=1.0):
 
     print('Summing counts...')
     # TODO optimize with matrix multiplication
-    absolute_occurrence_count = feature_matrix.apply(func=np.sum, axis=1)
-    occurrences_in_all_mentions_count = indicator_matrix.apply(func=np.sum, axis=1)
-    occurrences_in_rel_mentions_count = indicator_matrix_for_relevance.apply(func=np.sum, axis=1)
-    occrrences_in_nerel_mentions_count = indicator_matrix_for_irrelevance.apply(func=np.sum, axis=1)
+    occurrences_count_absolute = feature_matrix.apply(func=np.sum, axis=1)
+    occurrences_count_all = indicator_matrix.apply(func=np.sum, axis=1)
+    occurrences_count_rel = indicator_matrix_for_relevance.apply(func=np.sum, axis=1)
+    occurrences_count_nerel = indicator_matrix_for_irrelevance.apply(func=np.sum, axis=1)
+
     print('Sorting...')
-    absolute_occurrence_count.sort_values(inplace=True, ascending=False)
-    occurrences_in_all_mentions_count.sort_values(inplace=True, ascending=False)
-    occurrences_in_rel_mentions_count.sort_values(inplace=True, ascending=False)
-    occrrences_in_nerel_mentions_count.sort_values(inplace=True, ascending=False)
+    occurrences_count_absolute.sort_values(inplace=True, ascending=False)
+    occurrences_count_all.sort_values(inplace=True, ascending=False)
+    occurrences_count_rel.sort_values(inplace=True, ascending=False)
+    occurrences_count_nerel.sort_values(inplace=True, ascending=False)
+
+    print('Naming')
+    occurrences_count_absolute.rename('count')
+    occurrences_count_all.rename('count')
+    occurrences_count_rel.rename('count')
+    occurrences_count_nerel.rename('count')
 
 
     print('Archiving')
-    archive_matrix(absolute_occurrence_count, 'occurrences_count_absolute', ratio )
-    archive_matrix(absolute_occurrence_count, 'occurrences_count_all', ratio )
-    archive_matrix(absolute_occurrence_count, 'occurrences_count_rel', ratio )
-    archive_matrix(absolute_occurrence_count, 'occurrences_count_nerel', ratio )
+    archive_matrix(occurrences_count_absolute, 'occurrences_count_absolute', ratio )
+    archive_matrix(occurrences_count_absolute, 'occurrences_count_all', ratio )
+    archive_matrix(occurrences_count_absolute, 'occurrences_count_rel', ratio )
+    archive_matrix(occurrences_count_absolute, 'occurrences_count_nerel', ratio )
 
     print('Updating latest')
     dir_name = '../resources/word_vectorization_matrices/latest/occurrences_count_'
-    absolute_occurrence_count.to_csv(dir_name + 'absolute.csv')
-    occurrences_in_all_mentions_count.to_csv(dir_name + 'all.csv')
-    occurrences_in_rel_mentions_count.to_csv(dir_name + 'rel.csv')
-    occrrences_in_nerel_mentions_count.to_csv(dir_name + 'nerel.csv')
+    occurrences_count_absolute.to_csv(dir_name + 'absolute.csv')
+    occurrences_count_all.to_csv(dir_name + 'all.csv')
+    occurrences_count_rel.to_csv(dir_name + 'rel.csv')
+    occurrences_count_nerel.to_csv(dir_name + 'nerel.csv')
 
 
 def archive_matrix(matrix, file_name, ratio):
