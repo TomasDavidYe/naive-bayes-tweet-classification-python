@@ -5,12 +5,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from helper_methods import get_stop_words
 import os
 
-print('Creating stop words list')
-stop_words_cz = get_stop_words()
 
-
-def create_feature_matrix(matrix, tokens) -> pd.DataFrame:
-    doc_names = ['mention_{:d}'.format(i) for i, value in enumerate(matrix)]
+def rename_columns_for_feature_matrix(matrix, tokens) -> pd.DataFrame:
+    doc_names = ['mention_{:d}'.format(i + 2) for i, value in enumerate(matrix)]
     return pd.DataFrame(data=matrix, index=doc_names, columns=tokens).transpose()
 
 
@@ -46,14 +43,19 @@ def get_data_for_vectorization(ratio):
     return [train_set, test_set]
 
 
-def vectorize(ratio=1.0):
+def get_feature_matrix(ratio):
     [mentions_train, mentions_test] = get_data_for_vectorization(ratio)
+    print('Creating stop words list')
+    stop_words_cz = get_stop_words()
     vectorizer = CountVectorizer(stop_words=stop_words_cz)
     print('Fitting...')
     matrix_raw = vectorizer.fit_transform(mentions_train).todense()
     print('Making matrices...')
     feature_names = vectorizer.get_feature_names()
-    feature_matrix = create_feature_matrix(matrix_raw, feature_names)
+    return rename_columns_for_feature_matrix(matrix_raw, feature_names)
+
+def vectorize(ratio=1.0):
+    feature_matrix = get_feature_matrix(ratio)
     indicator_matrix = get_indicator_matrix(feature_matrix)
     indicator_matrix_for_relevance = get_relevance_indicator_matrix(indicator_matrix)
     indicator_matrix_for_irrelevance = get_irrelevance_indicator_matrix(indicator_matrix)
@@ -108,5 +110,4 @@ def archive_matrix(matrix, file_name, ratio):
     matrix.to_csv(path)
 
 
-vectorize(1)
 

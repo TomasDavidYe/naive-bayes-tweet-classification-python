@@ -38,12 +38,13 @@ def load_and_clean_data():
     columns_names_with_text = ['Obsah zmínek', 'Kontext', 'Klíčová slova']
     dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
     categories = set(dataset['Štítek'].unique())
-    column_name_for_dropping = ['id', 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
+    column_name_for_dropping = [ 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
     dataset.drop(columns=column_name_for_dropping, inplace=True)
     dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x, categories))
     return dataset
 
 
 def save_cleaner_data():
-    load_and_clean_data().to_csv('../resources/general_data/cleaner_data.csv_' + datetime.datetime.now().strftime('%c'))
+    load_and_clean_data().to_csv('../resources/general_data/cleaner_data.csv')
 
+save_cleaner_data()
