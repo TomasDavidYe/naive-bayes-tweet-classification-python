@@ -29,8 +29,11 @@ def create_aggregation_matrices_for_domain_and_domain_group(ratio=1.0):
     aggregate_matrix_domaingroup = create_simple_aggregate_matrix_for('domaingroup', ratio)
     aggregate_matrix_domain.to_csv(
         '../resources/aggregation_matrices/domain/aggregation_matrix_domain_' + time + '.csv')
+    aggregate_matrix_domain.to_csv('../resources/aggregation_matrices/domain/latest.csv')
     aggregate_matrix_domaingroup.to_csv(
         '../resources/aggregation_matrices/domain_group/aggregation_matrix_domaingroup_' + time + '.csv')
+    aggregate_matrix_domaingroup.to_csv(
+        '../resources/aggregation_matrices/domain_group/latest.csv')
 
 
-create_aggregation_matrices_for_domain_and_domain_group(0.8)
+create_aggregation_matrices_for_domain_and_domain_group(1.0)

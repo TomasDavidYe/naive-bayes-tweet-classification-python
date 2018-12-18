@@ -51,6 +51,7 @@ def get_replace_dictionary():
 
 def get_column_names_for_dropping():
     return [
+        'id',
         'Unnamed: 0',
         'Obsah zmínek',
         'Datum vytvoření',

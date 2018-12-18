@@ -50,9 +50,11 @@ def create_aggregation_matrix_author(ratio=1.0):
     aggregate_matrix_authors = reorder_columns(aggregate_matrix_authors)
     time = datetime.now().strftime('%c').replace(' ', '_')
     aggregate_matrix_authors.to_csv('../resources/aggregation_matrices/authors/aggregation_matrix_authors_' + time + '.csv')
+    aggregate_matrix_authors.to_csv('../resources/aggregation_matrices/authors/latest.csv')
 
 
-create_aggregation_matrix_author(0.8)
+
+create_aggregation_matrix_author(1.0)
 
 
 

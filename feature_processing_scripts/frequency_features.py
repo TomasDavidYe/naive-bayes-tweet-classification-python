@@ -49,22 +49,3 @@ zminka = data.loc[data['id'] == id][zminka_tag].iloc[0]
 
 for word in words:
     print(word in zminka.split(' '))
-
-
-
-
-
-
-
-
-
-A = pd.DataFrame(index=['R1', 'R2', 'R3'], columns=['C1', 'C2', 'C3'], data=[[1, 2, 3],
-                                                                             [4, 5, 6],
-                                                                             [7, 8, 9,]])
-B = pd.Series(data={'R1': 11 , 'R2': 12, 'R3': 13}, name='C4')
-
-C = A.join(B)
-
-
-
-
