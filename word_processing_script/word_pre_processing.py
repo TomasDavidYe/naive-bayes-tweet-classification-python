@@ -111,3 +111,4 @@ def archive_matrix(matrix, file_name, ratio):
 
 
 
+vectorize()

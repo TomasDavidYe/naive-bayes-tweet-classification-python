@@ -1,6 +1,10 @@
 import pandas as pd
 from datetime import datetime
-import  re
+import re
+from sklearn.feature_extraction.text import CountVectorizer
+
+# import os
+# os.chdir(os.getcwd() + '/feature_processing_scripts')
 
 class FeatureMatrixBuilder:
 
@@ -10,11 +14,11 @@ class FeatureMatrixBuilder:
     def build(self):
         return self.matrix
 
-    def save(self):
+    def save(self, name):
         print('Saving...')
         regex = re.compile('[/ ]')
         time = regex.sub('_', datetime.now().strftime('%c').lower())
-        self.matrix.to_csv('../resources/feature_matrices/feature_matrix_' + time + '.csv')
+        self.matrix.to_csv('../resources/feature_matrices/'+name+'_feature_matrix_' + time + '.csv')
 
 
     # TODO refactor it so it doesn contain duplicates
@@ -62,9 +66,94 @@ class FeatureMatrixBuilder:
         self.matrix = self.matrix.join(data)
         return self
 
+    def add_word_count_features(self):
+        print('Adding word count features...')
+        feature_matrix = self.get_feature_matrix()
+        self.matrix = self.matrix.join(feature_matrix)
+        return self
 
-FeatureMatrixBuilder(source='../resources/general_data/cleaner_data.csv')\
-    .add_domain_features()\
-    .add_domain_group_features()\
-    .add_author_features()\
-    .save()
+    def add_word_identicator_features(self):
+        print('Adding word indicator features...')
+        feature_matrix = self.get_feature_matrix()
+        id_matrix = feature_matrix.applymap(lambda x: int(x > 0))
+        self.matrix = self.matrix.join(id_matrix)
+        return self
+
+    def get_frequency_count_all_features(self):
+        return self
+
+    def get_frequency_count_rel_features(self):
+        return self
+
+    def get_frequency_count_nerel_features(self):
+        return self
+
+    def add_mention_word_count_feature(self):
+        data = pd.read_csv('../resources/general_data/cleaner_data.csv')[['id', 'Obsah zmínek']].dropna(
+            subset=['Obsah zmínek']).set_index('id')
+        data.columns = ['other_zminka_count_words']
+        transformed = data['other_zminka_count_words'].map(lambda x: len(x.split(' ')))
+        self.matrix = self.matrix.join(transformed)
+        return self
+
+    def add_link_count_feature(self):
+        regex = re.compile('https:\\/\\/')
+        data = pd.read_excel('../resources/general_data/data.xlsm')[['id', 'Obsah zmínek']].dropna(
+            subset=['Obsah zmínek']).set_index('id')
+        data.columns = ['other_zminka_count_links']
+        transformed = data['other_zminka_count_links'].map(lambda x: len(regex.findall(x)))
+        self.matrix = self.matrix.join(transformed)
+        return self
+
+    def add_mention_letter_count_feature(self):
+        data = pd.read_csv('../resources/general_data/cleaner_data.csv')[['id', 'Obsah zmínek']].dropna(
+            subset=['Obsah zmínek']).set_index('id')
+        data.columns = ['other_zminka_count_letters']
+        transformed = data['other_zminka_count_letters'].map(lambda x: len(x))
+        self.matrix = self.matrix.join(transformed)
+        return self
+
+    def add_mention_hour_feature(self):
+        data = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(
+            subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
+        data.columns = ['other_time_hour']
+        transformed = data['other_time_hour'].map(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M').hour)
+        self.matrix = self.matrix.join(transformed)
+        return self
+
+    def add_mention_weekday_feature(self):
+        data = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(
+            subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
+        data.columns = ['other_time_weekday']
+        transformed = data['other_time_weekday'].map(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M').weekday())
+        self.matrix = self.matrix.join(transformed)
+        return self
+
+    def add_indicator_of_diacritics_usage(self):
+        regex = re.compile('[ěščřžýáíéúůňťďĚŠČŘŽÝÁÍÉÚŮŇĎŤ]')
+        data = pd.read_excel('../resources/general_data/data.xlsm')[['id', 'Obsah zmínek']].dropna(
+            subset=['Obsah zmínek']).set_index('id')
+        data.columns = ['other_zminka_diacritic_usage']
+        transformed = data['other_zminka_diacritic_usage'].map(lambda x: int(regex.search(x) is not None))
+        self.matrix = self.matrix.join(transformed)
+        return self
+
+    def get_feature_matrix(self):
+        id_to_mention = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])[
+            ['id', 'Obsah zmínek']]
+        vocabulary = list(pd.read_csv('../resources/word_vectorization_matrices/latest/occurrences_count_all.csv',
+                                      names=['word_text', 'count']).loc[:5000, 'word_text'])
+        vectorizer = CountVectorizer(vocabulary=vocabulary)
+        return pd.DataFrame(index=id_to_mention['id'], columns=vocabulary,
+                            data=vectorizer.transform(id_to_mention['Obsah zmínek']).todense())
+
+
+
+builder = FeatureMatrixBuilder(source='../resources/general_data/cleaner_data.csv')
+result = builder.add_mention_word_count_feature()\
+    .add_mention_letter_count_feature()\
+    .add_link_count_feature()\
+    .add_mention_weekday_feature()\
+    .add_mention_hour_feature()\
+    .add_indicator_of_diacritics_usage()\
+    .build()
