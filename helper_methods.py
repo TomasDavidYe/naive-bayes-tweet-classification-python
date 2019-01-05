@@ -54,7 +54,6 @@ def get_column_names_for_dropping():
         'id',
         'Unnamed: 0',
         'Obsah zmínek',
-        'Datum vytvoření',
         'Vloženo do databáze',
         'Kontext',
         'Odkaz na zmínku',

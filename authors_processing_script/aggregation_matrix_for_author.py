@@ -38,6 +38,7 @@ def create_aggregation_matrix_author(ratio=1.0):
     dataset = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Autor']).drop(
         columns=column_names_for_dropping).fillna(0)
     train_set_size = int(len(dataset) * ratio)
+    dataset.sort_values(by='Datum vytvoření', inplace=True)
     dataset = dataset[:train_set_size]
     authors_column = dataset['Autor']
     value_counts = authors_column.value_counts()
@@ -54,7 +55,7 @@ def create_aggregation_matrix_author(ratio=1.0):
 
 
 
-create_aggregation_matrix_author(1.0)
+create_aggregation_matrix_author(0.75)
 
 
 

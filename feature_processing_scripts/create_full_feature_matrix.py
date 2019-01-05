@@ -12,27 +12,31 @@ class FeatureMatrixBuilder:
         self.matrix = pd.read_csv(source).dropna(subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
 
     def build(self):
-        return self.matrix
+        return self.matrix.sort_values(by='Datum vytvoření')
 
     def save(self, name):
         print('Saving...')
         regex = re.compile('[/ ]')
         time = regex.sub('_', datetime.now().strftime('%c').lower())
-        self.matrix.to_csv('../resources/feature_matrices/'+name+'_feature_matrix_' + time + '.csv')
+        self.matrix.sort_values(by='Datum vytvoření').to_csv('../resources/feature_matrices/'+name+'_feature_matrix_' + time + '.csv')
 
 
     # TODO refactor it so it doesn contain duplicates
     def add_author_features(self):
         print('Adding author features...')
         authors_db = pd.read_csv('../resources/aggregation_matrices/authors/latest.csv').drop(columns=['Unnamed: 0']).set_index('author')
-        empty_author = pd.Series(name='XXXNONAMEXXX', data=[0 for column_name in authors_db.columns.values], index=authors_db.columns.values)
+        empty_author = pd.Series(name='XXXNONAMEXXX', data=[-10 for column_name in authors_db.columns.values], index=authors_db.columns.values)
         authors_db = authors_db.append(empty_author)
         id_to_author = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])[['id', 'Autor']].set_index('id').fillna('XXXNONAMEXXX')
+        known_authors = authors_db.index
         temp = {}
         for ident in id_to_author.index:
             author = id_to_author.loc[ident, 'Autor']
-            author_row = authors_db.loc[author]
-            temp[ident] = dict(author_row)
+            if author in known_authors:
+                author_row = authors_db.loc[author]
+                temp[ident] = dict(author_row)
+            else:
+                temp[ident] = dict(pd.Series(data=[-10 for column_name in authors_db.columns.values], index=authors_db.columns.values))
         data = pd.DataFrame(data=temp).transpose()
         data.loc[:, 'author_percentage_rel'] = (data.loc[:, 'author_count_rel'] + 1) / (data.loc[:, 'author_count_nerel'] + 1)
         self.matrix = self.matrix.join(data)
@@ -42,11 +46,15 @@ class FeatureMatrixBuilder:
         print('Adding domain features...')
         domain_db = pd.read_csv('../resources/aggregation_matrices/domain/latest.csv').drop(columns=['Unnamed: 0']).set_index('domain')
         id_to_domain = pd.read_csv('../resources/general_data/cleaner_data.csv')[['id', 'Doména']].set_index('id')
+        known_domains = list(domain_db.index)
         temp = {}
         for ident in id_to_domain.index:
             domain = id_to_domain.loc[ident, 'Doména']
-            domain_row = domain_db.loc[domain]
-            temp[ident] = dict(domain_row)
+            if domain in known_domains:
+                domain_row = domain_db.loc[domain]
+                temp[ident] = dict(domain_row)
+            else:
+                temp[ident] = {'domain_count': -10, 'domain_count_rel': -10, 'domain_count_nerel': -10}
         data = pd.DataFrame(data=temp).transpose()
         data.loc[:, 'domain_percentage_rel'] = (data.loc[:, 'domain_count_rel'] + 1) / (data.loc[:, 'domain_count_nerel'] + 1)
         self.matrix = self.matrix.join(data)
@@ -55,16 +63,22 @@ class FeatureMatrixBuilder:
     def add_domain_group_features(self):
         print('Adding domain_group features...')
         domain_group_db = pd.read_csv('../resources/aggregation_matrices/domain_group/latest.csv').drop(columns=['Unnamed: 0']).set_index('domaingroup')
+        known_domain_groups = list(domain_group_db.index)
         id_to_domain_group = pd.read_csv('../resources/general_data/cleaner_data.csv')[['id', 'Skupina domén']].set_index('id')
         temp = {}
         for ident in id_to_domain_group.index:
             domain_group = id_to_domain_group.loc[ident, 'Skupina domén']
-            domain_group_row = domain_group_db.loc[domain_group]
-            temp[ident] = dict(domain_group_row)
+            if domain_group in known_domain_groups:
+                domain_group_row = domain_group_db.loc[domain_group]
+                temp[ident] = dict(domain_group_row)
+            else:
+                temp[ident] = {'domaingroup_count': -10, 'domaingroup_count_rel': -10, 'domaingroup_count_nerel': -10}
         data = pd.DataFrame(data=temp).transpose()
         data.loc[:, 'domaingroup_percentage_rel'] = (data.loc[:, 'domaingroup_count_rel'] + 1) / (data.loc[:, 'domaingroup_count_nerel'] + 1)
         self.matrix = self.matrix.join(data)
         return self
+
+        A = domain_group_db.loc['Facebook']
 
     def add_word_count_features(self):
         print('Adding word count features...')
@@ -72,13 +86,14 @@ class FeatureMatrixBuilder:
         self.matrix = self.matrix.join(feature_matrix)
         return self
 
-    def add_word_identicator_features(self):
+    def add_word_indicator_features(self):
         print('Adding word indicator features...')
         feature_matrix = self.get_feature_matrix()
         id_matrix = feature_matrix.applymap(lambda x: int(x > 0))
         self.matrix = self.matrix.join(id_matrix)
         return self
 
+    # TODO implement these methods!!!
     def get_frequency_count_all_features(self):
         return self
 
@@ -150,10 +165,6 @@ class FeatureMatrixBuilder:
 
 
 builder = FeatureMatrixBuilder(source='../resources/general_data/cleaner_data.csv')
-result = builder.add_mention_word_count_feature()\
-    .add_mention_letter_count_feature()\
-    .add_link_count_feature()\
-    .add_mention_weekday_feature()\
-    .add_mention_hour_feature()\
-    .add_indicator_of_diacritics_usage()\
-    .build()
+builder.add_word_indicator_features()\
+    .save('word_count')
+

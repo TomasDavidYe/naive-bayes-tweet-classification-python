@@ -35,11 +35,12 @@ def tag_with_relevance(mention, relevance):
 
 def get_data_for_vectorization(ratio):
     print('Loading...')
-    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv')
+    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv').set_index('id')
+    dataset.sort_values(by='Datum vytvoření', inplace=True)
     train_length = int(len(dataset) * ratio)
     temp = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
-    train_set = temp[:train_length]
-    test_set = temp[train_length:]
+    train_set = temp.iloc[:train_length]
+    test_set = temp.iloc[train_length:]
     return [train_set, test_set]
 
 
@@ -111,4 +112,4 @@ def archive_matrix(matrix, file_name, ratio):
 
 
 
-vectorize()
+vectorize(0.75)

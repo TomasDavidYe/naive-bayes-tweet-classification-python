@@ -5,7 +5,9 @@ import pandas as pd
 
 def create_simple_aggregate_matrix_for(variable_name, ratio):
     column_name = get_column_names_for_simple_matrix_dictionary().get(variable_name)
-    data = pd.read_csv('../resources/general_data/cleaner_data.csv')[[column_name, 'Štítek']].dropna(subset=[column_name])
+    data = pd.read_csv('../resources/general_data/cleaner_data.csv')[[column_name, 'Štítek', 'Datum vytvoření']].dropna(subset=[column_name])
+    data.sort_values(by='Datum vytvoření', inplace=True)
+    data.drop(columns=['Datum vytvoření'])
     train_set_size = int(len(data) * ratio)
     data = data[:train_set_size]
     value_counts = data[column_name].value_counts()
@@ -36,4 +38,4 @@ def create_aggregation_matrices_for_domain_and_domain_group(ratio=1.0):
         '../resources/aggregation_matrices/domain_group/latest.csv')
 
 
-create_aggregation_matrices_for_domain_and_domain_group(1.0)
+create_aggregation_matrices_for_domain_and_domain_group(0.75)
