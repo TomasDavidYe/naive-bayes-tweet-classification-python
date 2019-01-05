@@ -2,14 +2,16 @@ from helper_methods import get_column_names_for_simple_matrix_dictionary
 from datetime import datetime
 import pandas as pd
 
+# import os
+# os.chdir(os.getcwd() + '/domain_processing_script')
 
 def create_simple_aggregate_matrix_for(variable_name, ratio):
     column_name = get_column_names_for_simple_matrix_dictionary().get(variable_name)
-    data = pd.read_csv('../resources/general_data/cleaner_data.csv')[[column_name, 'Štítek', 'Datum vytvoření']].dropna(subset=[column_name])
+    data = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])
     data.sort_values(by='Datum vytvoření', inplace=True)
-    data.drop(columns=['Datum vytvoření'])
     train_set_size = int(len(data) * ratio)
     data = data[:train_set_size]
+    data = data[[column_name, 'Štítek']]
     value_counts = data[column_name].value_counts()
     values = value_counts.keys()
     temp = list([])

@@ -2,6 +2,9 @@ import numpy as np
 from helper_methods import *
 from datetime import datetime
 
+# import os
+# os.chdir(os.getcwd() + "/authors_processing_script")
+
 
 def get_features_for_author(author, dataset):
     result = {}
@@ -35,11 +38,11 @@ def reorder_columns(matrix):
 
 def create_aggregation_matrix_author(ratio=1.0):
     column_names_for_dropping = get_column_names_for_dropping()
-    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Autor']).drop(
-        columns=column_names_for_dropping).fillna(0)
+    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek']).drop(columns=column_names_for_dropping)
     train_set_size = int(len(dataset) * ratio)
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     dataset = dataset[:train_set_size]
+    dataset = dataset.drop(columns=['id', 'Datum vytvoření']).dropna(subset=['Autor']).fillna(0)
     authors_column = dataset['Autor']
     value_counts = authors_column.value_counts()
     authors = value_counts.keys()
