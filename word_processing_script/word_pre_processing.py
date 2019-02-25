@@ -10,7 +10,6 @@ def rename_columns_for_feature_matrix(matrix, tokens) -> pd.DataFrame:
     doc_names = ['mention_{:d}'.format(i + 2) for i, value in enumerate(matrix)]
     return pd.DataFrame(data=matrix, index=doc_names, columns=tokens).transpose()
 
-
 def get_indicator_matrix(feature_matrix):
     return feature_matrix.apply(lambda x: x > 0).astype(dtype=int)
 
@@ -33,9 +32,10 @@ def tag_with_relevance(mention, relevance):
         return mention
 
 
-def get_data_for_vectorization(ratio):
+def get_data_for_vectorization(month, ratio):
     print('Loading...')
-    dataset = pd.read_csv('../resources/source_data/cleaner_data.csv').set_index('id')
+    source_path = '../resources/source_data/cleaner_data_' + month + '.csv'
+    dataset = pd.read_csv(source_path).set_index('id')
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     train_length = int(len(dataset) * ratio)
     temp = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
@@ -44,8 +44,8 @@ def get_data_for_vectorization(ratio):
     return [train_set, test_set]
 
 
-def get_feature_matrix(ratio):
-    [mentions_train, mentions_test] = get_data_for_vectorization(ratio)
+def get_feature_matrix(month, ratio):
+    [mentions_train, mentions_test] = get_data_for_vectorization(month ,ratio)
     print('Creating stop words list')
     stop_words_cz = get_stop_words()
     vectorizer = CountVectorizer(stop_words=stop_words_cz)
@@ -55,8 +55,9 @@ def get_feature_matrix(ratio):
     feature_names = vectorizer.get_feature_names()
     return rename_columns_for_feature_matrix(matrix_raw, feature_names)
 
-def vectorize(ratio=1.0):
-    feature_matrix = get_feature_matrix(ratio)
+
+def vectorize(month, ratio=1.0):
+    feature_matrix = get_feature_matrix(month, ratio)
     indicator_matrix = get_indicator_matrix(feature_matrix)
     indicator_matrix_for_relevance = get_relevance_indicator_matrix(indicator_matrix)
     indicator_matrix_for_irrelevance = get_irrelevance_indicator_matrix(indicator_matrix)
@@ -88,28 +89,27 @@ def vectorize(ratio=1.0):
 
 
     print('Archiving')
-    archive_matrix(occurrences_count_absolute, 'occurrences_count_absolute', ratio )
-    archive_matrix(occurrences_count_absolute, 'occurrences_count_all', ratio )
-    archive_matrix(occurrences_count_absolute, 'occurrences_count_rel', ratio )
-    archive_matrix(occurrences_count_absolute, 'occurrences_count_nerel', ratio )
+    archive_matrix(occurrences_count_absolute, month, 'occurrences_count_absolute', ratio)
+    archive_matrix(occurrences_count_absolute, month, 'occurrences_count_all', ratio)
+    archive_matrix(occurrences_count_absolute, month, 'occurrences_count_rel', ratio)
+    archive_matrix(occurrences_count_absolute, month, 'occurrences_count_nerel', ratio)
 
     print('Updating latest')
-    dir_name = '../resources/word_vectorization_matrices/latest/occurrences_count_'
+    dir_name = '../resources/word_vectorization_matrices/' + month + '/latest/occurrences_count_'
     occurrences_count_absolute.to_csv(dir_name + 'absolute.csv')
     occurrences_count_all.to_csv(dir_name + 'all.csv')
     occurrences_count_rel.to_csv(dir_name + 'rel.csv')
     occurrences_count_nerel.to_csv(dir_name + 'nerel.csv')
 
 
-def archive_matrix(matrix, file_name, ratio):
+def archive_matrix(matrix, month, file_name, ratio):
     time = datetime.datetime.now().strftime('%c').replace(' ', '_')
-    dir_name = '../resources/word_vectorization_matrices/' + time
+    dir_name = '../resources/word_vectorization_matrices/' + month + '/' + time
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
-    suffix = '_ratio_' + str(ratio) + '_time_' + time + '.csv'
+    suffix = '_ratio_' + str(ratio) + '.csv'
     path = os.path.join(dir_name, file_name + suffix)
     matrix.to_csv(path)
 
 
-
-vectorize(0.75)
+vectorize('prosinec', 0.7)
