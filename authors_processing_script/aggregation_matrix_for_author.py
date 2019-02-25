@@ -38,8 +38,8 @@ def reorder_columns(matrix):
 
 def create_aggregation_matrix_author(month, ratio=1.0):
     column_names_for_dropping = get_column_names_for_dropping()
-    get_path = '../resources/general_data/cleaner_data_' + month + '.csv'
-    dataset = pd.read_csv(get_path).dropna(subset=['Obsah zmínek']).drop(columns=column_names_for_dropping)
+    source_path = '../resources/source_data/cleaner_data_' + month + '.csv'
+    dataset = pd.read_csv(source_path).dropna(subset=['Obsah zmínek']).drop(columns=column_names_for_dropping)
     train_set_size = int(len(dataset) * ratio)
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     dataset = dataset[:train_set_size]

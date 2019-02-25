@@ -34,7 +34,7 @@ def map_category_to_relevance(category, categories):
 
 
 def load_and_clean_data(file_name):
-    path = '../resources/general_data/data_' + file_name
+    path = '../resources/source_data/data_' + file_name
     dataset = pd.read_excel(path)
     columns_names_with_text = ['Obsah zmínek', 'Kontext', 'Klíčová slova']
     dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
@@ -47,7 +47,7 @@ def load_and_clean_data(file_name):
 
 def save_cleaner_data(filename):
     month = filename.split('.')[0]
-    path = '../resources/general_data/cleaner_data_' + month + '.csv'
+    path = '../resources/source_data/cleaner_data_' + month + '.csv'
     load_and_clean_data(filename).to_csv(path)
 
 save_cleaner_data('prosinec.xlsx')

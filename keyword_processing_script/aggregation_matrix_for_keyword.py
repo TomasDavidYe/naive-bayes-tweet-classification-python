@@ -31,7 +31,7 @@ def get_irrelevance_indicator_matrix(indicator_matrix):
 
 
 def get_vectorization_for_keywords(ratio):
-    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv')[['Klíčová slova', 'Štítek']]
+    dataset = pd.read_csv('../resources/source_data/cleaner_data.csv')[['Klíčová slova', 'Štítek']]
     train_set_size = int(len(dataset) * ratio)
     dataset = dataset[:train_set_size]
     keywords = dataset.dropna().apply(func=lambda x: tag_with_relevance(x['Klíčová slova'], x['Štítek']), axis=1)

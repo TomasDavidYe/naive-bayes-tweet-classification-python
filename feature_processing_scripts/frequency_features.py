@@ -24,7 +24,7 @@ sums = top_words_matrix.apply(np.sum)
 id_tag = 'id'
 zminka_tag = 'Obsah zmínek'
 from sklearn.feature_extraction.text import CountVectorizer
-data = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek']).iloc[:10, [1, 3]]
+data = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(subset=['Obsah zmínek']).iloc[:10, [1, 3]]
 zminky = data[zminka_tag]
 
 vectorizer = CountVectorizer()

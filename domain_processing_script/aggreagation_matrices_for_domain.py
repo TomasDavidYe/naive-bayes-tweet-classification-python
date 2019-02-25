@@ -5,9 +5,10 @@ import pandas as pd
 # import os
 # os.chdir(os.getcwd() + '/domain_processing_script')
 
-def create_simple_aggregate_matrix_for(variable_name, ratio):
+def create_simple_aggregate_matrix_for(month, variable_name, ratio):
     column_name = get_column_names_for_simple_matrix_dictionary().get(variable_name)
-    data = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])
+    source_path = '../resources/source_data/cleaner_data_' + month + '.csv'
+    data = pd.read_csv(source_path).dropna(subset=['Obsah zmínek'])
     data.sort_values(by='Datum vytvoření', inplace=True)
     train_set_size = int(len(data) * ratio)
     data = data[:train_set_size]
@@ -27,17 +28,16 @@ def create_simple_aggregate_matrix_for(variable_name, ratio):
     return aggregate_matrix
 
 
-def create_aggregation_matrices_for_domain_and_domain_group(ratio=1.0):
+def create_aggregation_matrices_for_domain_and_domain_group(month, ratio=1.0):
     time = datetime.now().strftime('%c').replace(' ', '_')
-    aggregate_matrix_domain = create_simple_aggregate_matrix_for('domain', ratio)
-    aggregate_matrix_domaingroup = create_simple_aggregate_matrix_for('domaingroup', ratio)
-    aggregate_matrix_domain.to_csv(
-        '../resources/aggregation_matrices/domain/aggregation_matrix_domain_' + time + '.csv')
-    aggregate_matrix_domain.to_csv('../resources/aggregation_matrices/domain/latest.csv')
-    aggregate_matrix_domaingroup.to_csv(
-        '../resources/aggregation_matrices/domain_group/aggregation_matrix_domaingroup_' + time + '.csv')
-    aggregate_matrix_domaingroup.to_csv(
-        '../resources/aggregation_matrices/domain_group/latest.csv')
+    aggregate_matrix_domain = create_simple_aggregate_matrix_for(month, 'domain', ratio)
+    aggregate_matrix_domaingroup = create_simple_aggregate_matrix_for(month, 'domaingroup', ratio)
+    path_domain = '../resources/aggregation_matrices/domain/' + month + '/'
+    path_domaingroup = '../resources/aggregation_matrices/domain_group/' + month + '/'
+    aggregate_matrix_domain.to_csv(path_domain + 'latest.csv')
+    aggregate_matrix_domain.to_csv(path_domain + time + '.csv')
+    aggregate_matrix_domaingroup.to_csv(path_domaingroup + 'latest.csv')
+    aggregate_matrix_domaingroup.to_csv(path_domaingroup + time + '.csv')
 
 
-create_aggregation_matrices_for_domain_and_domain_group(0.75)
+create_aggregation_matrices_for_domain_and_domain_group('prosinec', 0.70)

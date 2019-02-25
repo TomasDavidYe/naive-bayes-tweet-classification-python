@@ -35,7 +35,7 @@ def tag_with_relevance(mention, relevance):
 
 def get_data_for_vectorization(ratio):
     print('Loading...')
-    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv').set_index('id')
+    dataset = pd.read_csv('../resources/source_data/cleaner_data.csv').set_index('id')
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     train_length = int(len(dataset) * ratio)
     temp = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
