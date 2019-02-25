@@ -12,7 +12,8 @@ class FeatureMatrixBuilder:
         self.matrix = pd.read_csv(source).dropna(subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
 
     def build(self):
-        return self.matrix.sort_values(by='Datum vytvoření')
+        return self.matrix\
+            # .sort_values(by='Datum vytvoření')
 
     def save(self, name):
         print('Saving...')
@@ -113,7 +114,7 @@ class FeatureMatrixBuilder:
 
     def add_link_count_feature(self):
         regex = re.compile('https:\\/\\/')
-        data = pd.read_excel('../resources/general_data/data.xlsm')[['id', 'Obsah zmínek']].dropna(
+        data = pd.read_excel('../resources/general_data/data_rijen.xlsm')[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_count_links']
         transformed = data['other_zminka_count_links'].map(lambda x: len(regex.findall(x)))
@@ -146,7 +147,7 @@ class FeatureMatrixBuilder:
 
     def add_indicator_of_diacritics_usage(self):
         regex = re.compile('[ěščřžýáíéúůňťďĚŠČŘŽÝÁÍÉÚŮŇĎŤ]')
-        data = pd.read_excel('../resources/general_data/data.xlsm')[['id', 'Obsah zmínek']].dropna(
+        data = pd.read_excel('../resources/general_data/data_rijen.xlsm')[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_diacritic_usage']
         transformed = data['other_zminka_diacritic_usage'].map(lambda x: int(regex.search(x) is not None))
@@ -162,9 +163,30 @@ class FeatureMatrixBuilder:
         return pd.DataFrame(index=id_to_mention['id'], columns=vocabulary,
                             data=vectorizer.transform(id_to_mention['Obsah zmínek']).todense())
 
+    def add_relevance_tag(self):
+        print('Adding relevance tag')
+        id_to_relevance = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])[['id', 'Štítek']].set_index('id')
+        temp = id_to_relevance.applymap(func=lambda x: int(x == 'rel'))
+        self.matrix = self.matrix.join(temp)
+        return self
+
+
+    def add_all_non_word_features(self):
+        return self.add_author_features()\
+            .add_domain_group_features()\
+            .add_domain_features()\
+            .add_mention_word_count_feature()\
+            .add_mention_letter_count_feature()\
+            .add_link_count_feature()\
+            .add_mention_weekday_feature()\
+            .add_mention_hour_feature()\
+            .add_indicator_of_diacritics_usage()\
+
+
 
 
 builder = FeatureMatrixBuilder(source='../resources/general_data/cleaner_data.csv')
-builder.add_word_indicator_features()\
-    .save('word_count')
+matrix = builder.add_all_non_word_features().add_relevance_tag().save("non_word")
+
+
 

@@ -1,5 +1,5 @@
-import os
-import time
-os.system('python3 test.py')
-time.sleep(2)
-os.system('python3 test.py')
+from general_data_scripts.load_data import load_and_clean_data
+
+
+def create_feature_matrices_from_file(filename):
+    clean_data = load_and_clean_data(filename)tt

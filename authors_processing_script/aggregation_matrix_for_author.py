@@ -36,9 +36,10 @@ def reorder_columns(matrix):
     return matrix[cols]
 
 
-def create_aggregation_matrix_author(ratio=1.0):
+def create_aggregation_matrix_author(month, ratio=1.0):
     column_names_for_dropping = get_column_names_for_dropping()
-    dataset = pd.read_csv('../resources/general_data/cleaner_data.csv').dropna(subset=['Obsah zmínek']).drop(columns=column_names_for_dropping)
+    get_path = '../resources/general_data/cleaner_data_' + month + '.csv'
+    dataset = pd.read_csv(get_path).dropna(subset=['Obsah zmínek']).drop(columns=column_names_for_dropping)
     train_set_size = int(len(dataset) * ratio)
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     dataset = dataset[:train_set_size]
@@ -53,12 +54,12 @@ def create_aggregation_matrix_author(ratio=1.0):
 
     aggregate_matrix_authors = reorder_columns(aggregate_matrix_authors)
     time = datetime.now().strftime('%c').replace(' ', '_')
-    aggregate_matrix_authors.to_csv('../resources/aggregation_matrices/authors/aggregation_matrix_authors_' + time + '.csv')
-    aggregate_matrix_authors.to_csv('../resources/aggregation_matrices/authors/latest.csv')
+    save_path = '../resources/aggregation_matrices/authors/' + month + '/'
+    aggregate_matrix_authors.to_csv(save_path + time + '.csv')
+    aggregate_matrix_authors.to_csv(save_path + 'latest.csv')
 
 
-
-create_aggregation_matrix_author(0.75)
+create_aggregation_matrix_author('rijen', 0.70)
 
 
 
