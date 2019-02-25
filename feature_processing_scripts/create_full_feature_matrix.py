@@ -8,9 +8,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 class FeatureMatrixBuilder:
 
-    def __init__(self, source):
-        self.matrix = pd.read_csv(source).dropna(subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
-
+    def __init__(self, month):
+        self.month = month
+        self.reset_matrix()
     def build(self):
         return self.matrix\
             # .sort_values(by='Datum vytvoření')
@@ -19,16 +19,21 @@ class FeatureMatrixBuilder:
         print('Saving...')
         regex = re.compile('[/ ]')
         time = regex.sub('_', datetime.now().strftime('%c').lower())
-        self.matrix.sort_values(by='Datum vytvoření').to_csv('../resources/feature_matrices/'+name+'_feature_matrix_' + time + '.csv')
+        save_path = '../resources/feature_matrices/' + self.month + '/' + name + '_feature_matrix_' + time + '.csv'
+        self.matrix.sort_values(by='Datum vytvoření').to_csv(save_path)
 
+    def reset_matrix(self):
+        source = '../resources/source_data/cleaner_data_' + self.month + '.csv'
+        self.matrix = pd.read_csv(source).dropna(subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
 
     # TODO refactor it so it doesn contain duplicates
     def add_author_features(self):
         print('Adding author features...')
-        authors_db = pd.read_csv('../resources/aggregation_matrices/authors/latest.csv').drop(columns=['Unnamed: 0']).set_index('author')
+        source_path = '../resources/aggregation_matrices/authors/' + self.month + '/latest.csv'
+        authors_db = pd.read_csv(source_path).drop(columns=['Unnamed: 0']).set_index('author')
         empty_author = pd.Series(name='XXXNONAMEXXX', data=[-10 for column_name in authors_db.columns.values], index=authors_db.columns.values)
         authors_db = authors_db.append(empty_author)
-        id_to_author = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])[['id', 'Autor']].set_index('id').fillna('XXXNONAMEXXX')
+        id_to_author = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv').dropna(subset=['Obsah zmínek'])[['id', 'Autor']].set_index('id').fillna('XXXNONAMEXXX')
         known_authors = authors_db.index
         temp = {}
         for ident in id_to_author.index:
@@ -45,8 +50,9 @@ class FeatureMatrixBuilder:
 
     def add_domain_features(self):
         print('Adding domain features...')
-        domain_db = pd.read_csv('../resources/aggregation_matrices/domain/latest.csv').drop(columns=['Unnamed: 0']).set_index('domain')
-        id_to_domain = pd.read_csv('../resources/source_data/cleaner_data.csv')[['id', 'Doména']].set_index('id')
+        source_path = '../resources/aggregation_matrices/domain/' + self.month + '/latest.csv'
+        domain_db = pd.read_csv(source_path).drop(columns=['Unnamed: 0']).set_index('domain')
+        id_to_domain = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv')[['id', 'Doména']].set_index('id')
         known_domains = list(domain_db.index)
         temp = {}
         for ident in id_to_domain.index:
@@ -63,9 +69,9 @@ class FeatureMatrixBuilder:
 
     def add_domain_group_features(self):
         print('Adding domain_group features...')
-        domain_group_db = pd.read_csv('../resources/aggregation_matrices/domain_group/latest.csv').drop(columns=['Unnamed: 0']).set_index('domaingroup')
+        domain_group_db = pd.read_csv('../resources/aggregation_matrices/domain_group/' + self.month + '/latest.csv').drop(columns=['Unnamed: 0']).set_index('domaingroup')
         known_domain_groups = list(domain_group_db.index)
-        id_to_domain_group = pd.read_csv('../resources/source_data/cleaner_data.csv')[['id', 'Skupina domén']].set_index('id')
+        id_to_domain_group = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv')[['id', 'Skupina domén']].set_index('id')
         temp = {}
         for ident in id_to_domain_group.index:
             domain_group = id_to_domain_group.loc[ident, 'Skupina domén']
@@ -105,7 +111,7 @@ class FeatureMatrixBuilder:
         return self
 
     def add_mention_word_count_feature(self):
-        data = pd.read_csv('../resources/source_data/cleaner_data.csv')[['id', 'Obsah zmínek']].dropna(
+        data = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv')[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_count_words']
         transformed = data['other_zminka_count_words'].map(lambda x: len(x.split(' ')))
@@ -114,7 +120,12 @@ class FeatureMatrixBuilder:
 
     def add_link_count_feature(self):
         regex = re.compile('https:\\/\\/')
-        data = pd.read_excel('../resources/source_data/data_rijen.xlsm')[['id', 'Obsah zmínek']].dropna(
+        if self.month == 'rijen':
+            filename = self.month + '.xlsm'
+        else:
+            filename = self.month + '.xlsx'
+
+        data = pd.read_excel('../resources/source_data/data_' + filename)[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_count_links']
         transformed = data['other_zminka_count_links'].map(lambda x: len(regex.findall(x)))
@@ -122,7 +133,7 @@ class FeatureMatrixBuilder:
         return self
 
     def add_mention_letter_count_feature(self):
-        data = pd.read_csv('../resources/source_data/cleaner_data.csv')[['id', 'Obsah zmínek']].dropna(
+        data = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv')[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_count_letters']
         transformed = data['other_zminka_count_letters'].map(lambda x: len(x))
@@ -130,7 +141,7 @@ class FeatureMatrixBuilder:
         return self
 
     def add_mention_hour_feature(self):
-        data = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(
+        data = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv').dropna(
             subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
         data.columns = ['other_time_hour']
         transformed = data['other_time_hour'].map(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M').hour)
@@ -138,7 +149,7 @@ class FeatureMatrixBuilder:
         return self
 
     def add_mention_weekday_feature(self):
-        data = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(
+        data = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv').dropna(
             subset=['Obsah zmínek'])[['id', 'Datum vytvoření']].set_index('id')
         data.columns = ['other_time_weekday']
         transformed = data['other_time_weekday'].map(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M').weekday())
@@ -147,7 +158,11 @@ class FeatureMatrixBuilder:
 
     def add_indicator_of_diacritics_usage(self):
         regex = re.compile('[ěščřžýáíéúůňťďĚŠČŘŽÝÁÍÉÚŮŇĎŤ]')
-        data = pd.read_excel('../resources/source_data/data_rijen.xlsm')[['id', 'Obsah zmínek']].dropna(
+        if self.month == 'rijen':
+            filename = self.month + '.xlsm'
+        else:
+            filename = self.month + '.xlsx'
+        data = pd.read_excel('../resources/source_data/data_' + filename)[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_diacritic_usage']
         transformed = data['other_zminka_diacritic_usage'].map(lambda x: int(regex.search(x) is not None))
@@ -155,7 +170,7 @@ class FeatureMatrixBuilder:
         return self
 
     def get_feature_matrix(self):
-        id_to_mention = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])[
+        id_to_mention = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv').dropna(subset=['Obsah zmínek'])[
             ['id', 'Obsah zmínek']]
         vocabulary = list(pd.read_csv('../resources/word_vectorization_matrices/latest/occurrences_count_all.csv',
                                       names=['word_text', 'count']).loc[:5000, 'word_text'])
@@ -165,11 +180,10 @@ class FeatureMatrixBuilder:
 
     def add_relevance_tag(self):
         print('Adding relevance tag')
-        id_to_relevance = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(subset=['Obsah zmínek'])[['id', 'Štítek']].set_index('id')
+        id_to_relevance = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv').dropna(subset=['Obsah zmínek'])[['id', 'Štítek']].set_index('id')
         temp = id_to_relevance.applymap(func=lambda x: int(x == 'rel'))
         self.matrix = self.matrix.join(temp)
         return self
-
 
     def add_all_non_word_features(self):
         return self.add_author_features()\
@@ -184,9 +198,21 @@ class FeatureMatrixBuilder:
 
 
 
+def build_all_feature_matrices_for_given_month(month):
+    builder = FeatureMatrixBuilder(month)
 
-builder = FeatureMatrixBuilder(source='../resources/source_data/cleaner_data.csv')
-matrix = builder.add_all_non_word_features().add_relevance_tag().save("non_word")
+    print('building non word')
+    builder.add_all_non_word_features().save(month + '_non_word')
+    builder.reset_matrix()
+
+    print('building word count')
+    builder.add_word_count_features().save(month + '_word_count')
+    builder.reset_matrix()
+
+    print('building word indicator')
+    builder.add_word_indicator_features().save(month + '_word_indicator')
+    builder.reset_matrix()
 
 
-
+build_all_feature_matrices_for_given_month('prosinec')
+build_all_feature_matrices_for_given_month('rijen')
