@@ -19,7 +19,6 @@ def clear_duplicities(data: pd.DataFrame):
     return result
 
 
-
 def clear_diacritics_from(sentence):
     replace_dictionary = get_replace_dictionary()
     if isinstance(sentence, str):
@@ -67,5 +66,5 @@ def save_cleaner_data(filename):
 
 
 
-save_cleaner_data('prosinec.xlsx')
-save_cleaner_data('rijen.xlsm')
+# save_cleaner_data('prosinec.xlsx')
+# save_cleaner_data('rijen.xlsm')

@@ -8,16 +8,17 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 class FeatureMatrixBuilder:
 
-    def __init__(self, month):
-        self.month = month
+    def __init__(self, filename):
+        self.filename = filename
+        self.month = filename.split('.')[0]
         self.reset_matrix()
     def build(self):
-        return self.matrix\
-            # .sort_values(by='Datum vytvoření')
+        return self.matrix
+
 
     def save(self, name):
         print('Saving...')
-        regex = re.compile('[/ ]')
+        regex = re.compile('[\\/\\ ]')
         time = regex.sub('_', datetime.now().strftime('%c').lower())
         save_path = '../resources/feature_matrices/' + self.month + '/' + name + '_feature_matrix_' + time + '.csv'
         self.matrix.sort_values(by='Datum vytvoření').to_csv(save_path)
@@ -120,12 +121,8 @@ class FeatureMatrixBuilder:
 
     def add_link_count_feature(self):
         regex = re.compile('https:\\/\\/')
-        if self.month == 'rijen':
-            filename = self.month + '.xlsm'
-        else:
-            filename = self.month + '.xlsx'
 
-        data = pd.read_excel('../resources/source_data/data_' + filename)[['id', 'Obsah zmínek']].dropna(
+        data = pd.read_excel('../resources/source_data/data_' + self.filename)[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_count_links']
         transformed = data['other_zminka_count_links'].map(lambda x: len(regex.findall(x)))
@@ -158,11 +155,8 @@ class FeatureMatrixBuilder:
 
     def add_indicator_of_diacritics_usage(self):
         regex = re.compile('[ěščřžýáíéúůňťďĚŠČŘŽÝÁÍÉÚŮŇĎŤ]')
-        if self.month == 'rijen':
-            filename = self.month + '.xlsm'
-        else:
-            filename = self.month + '.xlsx'
-        data = pd.read_excel('../resources/source_data/data_' + filename)[['id', 'Obsah zmínek']].dropna(
+
+        data = pd.read_excel('../resources/source_data/data_' + self.filename)[['id', 'Obsah zmínek']].dropna(
             subset=['Obsah zmínek']).set_index('id')
         data.columns = ['other_zminka_diacritic_usage']
         transformed = data['other_zminka_diacritic_usage'].map(lambda x: int(regex.search(x) is not None))
@@ -198,8 +192,9 @@ class FeatureMatrixBuilder:
 
 
 
-def build_all_feature_matrices_for_given_month(month):
-    builder = FeatureMatrixBuilder(month)
+def build_all_feature_matrices_for_given_month(filename):
+    builder = FeatureMatrixBuilder(filename)
+    month = filename.split()[0]
 
     print('building non word')
     builder.add_all_non_word_features().save(month + '_non_word')
@@ -213,6 +208,6 @@ def build_all_feature_matrices_for_given_month(month):
     builder.add_word_indicator_features().save(month + '_word_indicator')
     builder.reset_matrix()
 
-
-build_all_feature_matrices_for_given_month('prosinec')
-build_all_feature_matrices_for_given_month('rijen')
+#
+# build_all_feature_matrices_for_given_month('prosinec')
+# build_all_feature_matrices_for_given_month('rijen')

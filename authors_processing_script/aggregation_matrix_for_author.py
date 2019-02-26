@@ -59,7 +59,7 @@ def create_aggregation_matrix_author(month, ratio=1.0):
     aggregate_matrix_authors.to_csv(save_path + 'latest.csv')
 
 
-create_aggregation_matrix_author('rijen', 0.70)
+# create_aggregation_matrix_author('rijen', 0.70)
 
 
 

@@ -40,4 +40,4 @@ def create_aggregation_matrices_for_domain_and_domain_group(month, ratio=1.0):
     aggregate_matrix_domaingroup.to_csv(path_domaingroup + time + '.csv')
 
 
-create_aggregation_matrices_for_domain_and_domain_group('prosinec', 0.70)
+# create_aggregation_matrices_for_domain_and_domain_group('prosinec', 0.70)

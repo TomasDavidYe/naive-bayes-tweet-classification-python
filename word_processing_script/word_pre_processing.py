@@ -112,4 +112,4 @@ def archive_matrix(matrix, month, file_name, ratio):
     matrix.to_csv(path)
 
 
-vectorize('prosinec', 0.7)
+# vectorize('prosinec', 0.7)
