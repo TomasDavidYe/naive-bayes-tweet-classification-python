@@ -55,7 +55,7 @@ def load_and_clean_data(file_name):
     column_name_for_dropping = [ 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
     dataset.drop(columns=column_name_for_dropping, inplace=True)
     dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x, categories))
-    return clear_duplicities(dataset)
+    return dataset.dropna(subset=['Obsah zmínek'])
 
 
 def save_cleaner_data(filename):
@@ -65,6 +65,13 @@ def save_cleaner_data(filename):
 
 
 
+# ratio = 0.35
+# data = load_and_clean_data('rijen_prosinec.xlsx')
+# train_length = int(len(data) * ratio)
+#
+# train_set = data.iloc[:train_length]
+# test_set = data.iloc[train_length:]
+# train_set.iloc[-1]['id']
 
 # save_cleaner_data('prosinec.xlsx')
 # save_cleaner_data('rijen.xlsm')

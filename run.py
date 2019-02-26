@@ -8,12 +8,23 @@ from feature_processing_scripts.create_full_feature_matrix import build_all_feat
 
 
 def create_directory_for_files(month):
-    pass
+    working_directory  = os.path.dirname(__file__)
+    folder_names = ['/aggregation_matrices/authors/',
+                    '/aggregation_matrices/domain/',
+                    '/aggregation_matrices/domain_group/',
+                    '/feature_matrices/',
+                    '/word_vectorization_matrices/']
+    for folder_name in folder_names:
+        if not os.path.exists(working_directory + '/resources/' + folder_name + month):
+            os.mkdir(working_directory + '/resources/' + folder_name + month)
+    if not os.path.exists(working_directory + '/resources/word_vectorization_matrices/' + month + '/latest'):
+        os.mkdir(working_directory + '/resources/word_vectorization_matrices/' + month + '/latest')
 
 
 def create_feature_matrices_from_file(filename, ratio):
     month = filename.split('.')[0]
     create_directory_for_files(month)
+
     os.chdir(os.getcwd() + '/preprocessing_scripts')
     save_cleaner_data(filename)
 
@@ -41,14 +52,6 @@ def create_feature_matrices_from_file(filename, ratio):
     os.chdir(os.path.join(os.getcwd(), '..'))
 
 
-create_feature_matrices_from_file('rijen.xlsm', 0.7)
-create_feature_matrices_from_file('prosinec.xlsx', 0.7)
+create_feature_matrices_from_file('rijen_prosinec.xlsx', 0.35)
 
 
-import pandas as pd
-import os
-os.getcwd()
-rijen = pd.read_excel('./resources/source_data/data_rijen.xlsm')
-prosinec = pd.read_excel('./resources/source_data/data_prosinec.xlsx')
-rijen_prosinec = rijen.append(prosinec, ignore_index=True).set_index('id')
-rijen_prosinec.to_excel('./resources/source_data/data_prosinec_rijen.xlsx')

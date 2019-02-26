@@ -18,8 +18,7 @@ class FeatureMatrixBuilder:
 
     def save(self, name):
         print('Saving...')
-        regex = re.compile('[\\/\\ ]')
-        time = regex.sub('_', datetime.now().strftime('%c').lower())
+        time = datetime.now().strftime('%d_%m_%Y')
         save_path = '../resources/feature_matrices/' + self.month + '/' + name + '_feature_matrix_' + time + '.csv'
         self.matrix.sort_values(by='Datum vytvoření').to_csv(save_path)
 
@@ -39,11 +38,16 @@ class FeatureMatrixBuilder:
         temp = {}
         for ident in id_to_author.index:
             author = id_to_author.loc[ident, 'Autor']
-            if author in known_authors:
-                author_row = authors_db.loc[author]
-                temp[ident] = dict(author_row)
+            if type(author) is pd.Series:
+                temp[ident] = dict(pd.Series(data=[-10 for column_name in authors_db.columns.values],
+                                             index=authors_db.columns.values))
             else:
-                temp[ident] = dict(pd.Series(data=[-10 for column_name in authors_db.columns.values], index=authors_db.columns.values))
+                if author in known_authors:
+                    author_row = authors_db.loc[author]
+                    temp[ident] = dict(author_row)
+                else:
+                    temp[ident] = dict(pd.Series(data=[-10 for column_name in authors_db.columns.values],
+                                                 index=authors_db.columns.values))
         data = pd.DataFrame(data=temp).transpose()
         data.loc[:, 'author_percentage_rel'] = (data.loc[:, 'author_count_rel'] + 1) / (data.loc[:, 'author_count_nerel'] + 1)
         self.matrix = self.matrix.join(data)
@@ -56,13 +60,18 @@ class FeatureMatrixBuilder:
         id_to_domain = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv')[['id', 'Doména']].set_index('id')
         known_domains = list(domain_db.index)
         temp = {}
+
         for ident in id_to_domain.index:
             domain = id_to_domain.loc[ident, 'Doména']
-            if domain in known_domains:
-                domain_row = domain_db.loc[domain]
-                temp[ident] = dict(domain_row)
-            else:
+            if type(domain) is pd.Series:
                 temp[ident] = {'domain_count': -10, 'domain_count_rel': -10, 'domain_count_nerel': -10}
+            else:
+                if domain in known_domains:
+                    domain_row = domain_db.loc[domain]
+                    temp[ident] = dict(domain_row)
+                else:
+                    temp[ident] = {'domain_count': -10, 'domain_count_rel': -10, 'domain_count_nerel': -10}
+
         data = pd.DataFrame(data=temp).transpose()
         data.loc[:, 'domain_percentage_rel'] = (data.loc[:, 'domain_count_rel'] + 1) / (data.loc[:, 'domain_count_nerel'] + 1)
         self.matrix = self.matrix.join(data)
@@ -74,13 +83,20 @@ class FeatureMatrixBuilder:
         known_domain_groups = list(domain_group_db.index)
         id_to_domain_group = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv')[['id', 'Skupina domén']].set_index('id')
         temp = {}
+
         for ident in id_to_domain_group.index:
             domain_group = id_to_domain_group.loc[ident, 'Skupina domén']
-            if domain_group in known_domain_groups:
-                domain_group_row = domain_group_db.loc[domain_group]
-                temp[ident] = dict(domain_group_row)
+            if type(domain_group) is pd.Series:
+                temp[ident] = {'domaingroup_count': -10, 'domaingroup_count_rel': -10,
+                               'domaingroup_count_nerel': -10}
             else:
-                temp[ident] = {'domaingroup_count': -10, 'domaingroup_count_rel': -10, 'domaingroup_count_nerel': -10}
+                if domain_group in known_domain_groups:
+                    domain_group_row = domain_group_db.loc[domain_group]
+                    temp[ident] = dict(domain_group_row)
+                else:
+                    temp[ident] = {'domaingroup_count': -10, 'domaingroup_count_rel': -10,
+                                   'domaingroup_count_nerel': -10}
+
         data = pd.DataFrame(data=temp).transpose()
         data.loc[:, 'domaingroup_percentage_rel'] = (data.loc[:, 'domaingroup_count_rel'] + 1) / (data.loc[:, 'domaingroup_count_nerel'] + 1)
         self.matrix = self.matrix.join(data)
@@ -194,7 +210,7 @@ class FeatureMatrixBuilder:
 
 def build_all_feature_matrices_for_given_month(filename):
     builder = FeatureMatrixBuilder(filename)
-    month = filename.split()[0]
+    month = filename.split('.')[0]
 
     print('building non word')
     builder.add_all_non_word_features().save(month + '_non_word')
