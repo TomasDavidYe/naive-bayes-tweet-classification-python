@@ -55,7 +55,7 @@ def load_and_clean_data(file_name):
     column_name_for_dropping = [ 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
     dataset.drop(columns=column_name_for_dropping, inplace=True)
     dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x, categories))
-    return dataset.dropna(subset=['Obsah zmínek'])
+    return clear_duplicities(dataset)
 
 
 def save_cleaner_data(filename):
