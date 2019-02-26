@@ -58,4 +58,3 @@ def create_matrix_with_top_n_words(n):
     aggregation_matrix_words.to_csv('../resources/aggregation_matrices/words/aggregation_matrix_words_' + time + '.csv')
 
 
-create_matrix_with_top_n_words(20)

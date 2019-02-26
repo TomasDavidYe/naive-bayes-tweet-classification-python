@@ -1,8 +1,22 @@
 import pandas as pd
 import re
 from helper_methods import get_replace_dictionary
-import datetime
 
+
+def clear_duplicities(data: pd.DataFrame):
+    result: pd.DataFrame = data.copy()
+    result.dropna(subset=['Obsah zmínek'])
+
+    twitter_retweet_regex = re.compile('rt [a-z]* ')
+    result['Obsah zmínek'] = result['Obsah zmínek'].apply(lambda x: twitter_retweet_regex.sub('', str(x)))
+
+    redundant_space_regex = re.compile('^ +')
+    result['Obsah zmínek'] = result['Obsah zmínek'].apply(lambda x: redundant_space_regex.sub('', str(x)))
+
+    result.sort_values(by='Datum vytvoření', inplace=True)
+    result.drop_duplicates(subset=['Obsah zmínek'], keep='first', inplace=True)
+
+    return result
 
 
 
@@ -42,7 +56,7 @@ def load_and_clean_data(file_name):
     column_name_for_dropping = [ 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
     dataset.drop(columns=column_name_for_dropping, inplace=True)
     dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x, categories))
-    return dataset
+    return clear_duplicities(dataset)
 
 
 def save_cleaner_data(filename):
@@ -50,4 +64,8 @@ def save_cleaner_data(filename):
     path = '../resources/source_data/cleaner_data_' + month + '.csv'
     load_and_clean_data(filename).to_csv(path)
 
+
+
+
 save_cleaner_data('prosinec.xlsx')
+save_cleaner_data('rijen.xlsm')
