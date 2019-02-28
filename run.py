@@ -7,7 +7,7 @@ from word_processing_script.word_pre_processing import vectorize
 from feature_processing_scripts.create_full_feature_matrix import build_all_feature_matrices_for_given_month
 
 
-def create_directory_for_files(month):
+def create_directories_for_data_files(month):
     working_directory  = os.path.dirname(__file__)
     folder_names = ['/aggregation_matrices/authors/',
                     '/aggregation_matrices/domain/',
@@ -23,7 +23,7 @@ def create_directory_for_files(month):
 
 def create_feature_matrices_from_file(filename, ratio):
     month = filename.split('.')[0]
-    create_directory_for_files(month)
+    create_directories_for_data_files(month)
 
     os.chdir(os.getcwd() + '/preprocessing_scripts')
     save_cleaner_data(filename)
@@ -52,6 +52,6 @@ def create_feature_matrices_from_file(filename, ratio):
     os.chdir(os.path.join(os.getcwd(), '..'))
 
 
-create_feature_matrices_from_file('rijen_prosinec.xlsx', 0.35)
+create_feature_matrices_from_file('rijen_prosinec.xlsx', 0.80)
 
 

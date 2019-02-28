@@ -182,7 +182,7 @@ class FeatureMatrixBuilder:
     def get_feature_matrix(self):
         id_to_mention = pd.read_csv('../resources/source_data/cleaner_data_' + self.month + '.csv').dropna(subset=['Obsah zmínek'])[
             ['id', 'Obsah zmínek']]
-        vocabulary = list(pd.read_csv('../resources/word_vectorization_matrices/latest/occurrences_count_all.csv',
+        vocabulary = list(pd.read_csv('../resources/word_vectorization_matrices/' + self.month + '/latest/occurrences_count_all.csv',
                                       names=['word_text', 'count']).loc[:5000, 'word_text'])
         vectorizer = CountVectorizer(vocabulary=vocabulary)
         return pd.DataFrame(index=id_to_mention['id'], columns=vocabulary,
