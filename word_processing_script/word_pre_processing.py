@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import datetime
 from sklearn.feature_extraction.text import CountVectorizer
+
+from constants import WORKING_DIRECTORY
 from helper_methods import get_stop_words
 import os
 
@@ -34,7 +36,7 @@ def tag_with_relevance(mention, relevance):
 
 def get_data_for_vectorization(month, ratio):
     print('Loading...')
-    source_path = '../resources/source_data/cleaner_data_' + month + '.csv'
+    source_path = WORKING_DIRECTORY + '/resources/source_data/cleaner_data_' + month + '.csv'
     dataset = pd.read_csv(source_path).set_index('id')
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     train_length = int(len(dataset) * ratio)
@@ -95,7 +97,7 @@ def vectorize(month, ratio=1.0):
     archive_matrix(occurrences_count_absolute, month, 'occurrences_count_nerel', ratio)
 
     print('Updating latest')
-    dir_name = '../resources/word_vectorization_matrices/' + month + '/latest/occurrences_count_'
+    dir_name = WORKING_DIRECTORY + '/resources/word_vectorization_matrices/' + month + '/latest/occurrences_count_'
     occurrences_count_absolute.to_csv(dir_name + 'absolute.csv')
     occurrences_count_all.to_csv(dir_name + 'all.csv')
     occurrences_count_rel.to_csv(dir_name + 'rel.csv')
@@ -104,7 +106,7 @@ def vectorize(month, ratio=1.0):
 
 def archive_matrix(matrix, month, file_name, ratio):
     time = datetime.datetime.now().strftime('%c').replace(' ', '_')
-    dir_name = '../resources/word_vectorization_matrices/' + month + '/' + time
+    dir_name = WORKING_DIRECTORY + '/resources/word_vectorization_matrices/' + month + '/' + time
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
     suffix = '_ratio_' + str(ratio) + '.csv'

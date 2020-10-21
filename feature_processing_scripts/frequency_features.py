@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from word_processing_script.word_pre_processing import get_feature_matrix
 
-occurrences_count_all = pd.read_csv('../resources/word_vectorization_matrices/latest/occurrences_count_all.csv', names=['word', 'count'])
+occurrences_count_all = pd.read_csv('resources/word_vectorization_matrices/latest/occurrences_count_all.csv', names=['word', 'count'])
 occurrences_count_all = occurrences_count_all.loc[occurrences_count_all['count'] >= 42]
 
 
@@ -24,7 +24,7 @@ sums = top_words_matrix.apply(np.sum)
 id_tag = 'id'
 zminka_tag = 'Obsah zmínek'
 from sklearn.feature_extraction.text import CountVectorizer
-data = pd.read_csv('../resources/source_data/cleaner_data.csv').dropna(subset=['Obsah zmínek']).iloc[:10, [1, 3]]
+data = pd.read_csv('resources/source_data/cleaner_data.csv').dropna(subset=['Obsah zmínek']).iloc[:10, [1, 3]]
 zminky = data[zminka_tag]
 
 vectorizer = CountVectorizer()

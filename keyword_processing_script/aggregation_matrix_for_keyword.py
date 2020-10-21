@@ -31,7 +31,7 @@ def get_irrelevance_indicator_matrix(indicator_matrix):
 
 
 def get_vectorization_for_keywords(ratio):
-    dataset = pd.read_csv('../resources/source_data/cleaner_data.csv')[['Klíčová slova', 'Štítek']]
+    dataset = pd.read_csv('resources/source_data/cleaner_data.csv')[['Klíčová slova', 'Štítek']]
     train_set_size = int(len(dataset) * ratio)
     dataset = dataset[:train_set_size]
     keywords = dataset.dropna().apply(func=lambda x: tag_with_relevance(x['Klíčová slova'], x['Štítek']), axis=1)
@@ -77,7 +77,7 @@ def create_aggregation_matrix_for_keywords(ratio=1.0):
     aggregate_matrix_keywords = pd.DataFrame(data=temp)[
         ['keyword', 'keyword_count', 'keyword_count_rel', 'keyword_count_nerel']]
     time = datetime.now().strftime('%c').replace(' ', '_')
-    aggregate_matrix_keywords.to_csv('../resources/aggregation_matrices/keywords/aggregation_matrix_keywords_' + time + '.csv')
+    aggregate_matrix_keywords.to_csv('resources/aggregation_matrices/keywords/aggregation_matrix_keywords_' + time + '.csv')
 
 
 create_aggregation_matrix_for_keywords(0.8)

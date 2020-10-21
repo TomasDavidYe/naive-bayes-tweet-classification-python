@@ -1,5 +1,7 @@
 import pandas as pd
 import re
+
+from constants import WORKING_DIRECTORY
 from helper_methods import get_replace_dictionary
 
 
@@ -47,12 +49,12 @@ def map_category_to_relevance(category, categories):
 
 
 def load_and_clean_data(file_name):
-    path = '../resources/source_data/data_' + file_name
+    path = WORKING_DIRECTORY + '/resources/source_data/data_' + file_name
     dataset = pd.read_excel(path)
     columns_names_with_text = ['Obsah zmínek', 'Kontext', 'Klíčová slova']
     dataset = clear_diacritics_from_columns(data=dataset, column_names=columns_names_with_text)
     categories = set(dataset['Štítek'].unique())
-    column_name_for_dropping = [ 'Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
+    column_name_for_dropping = ['Druh', 'Titul', 'Body kvality', 'Název projektu', 'Kategorie domény']
     dataset.drop(columns=column_name_for_dropping, inplace=True)
     dataset['Štítek'] = dataset['Štítek'].apply(lambda x: map_category_to_relevance(x, categories))
     return clear_duplicities(dataset)
@@ -60,10 +62,8 @@ def load_and_clean_data(file_name):
 
 def save_cleaner_data(filename):
     month = filename.split('.')[0]
-    path = '../resources/source_data/cleaner_data_' + month + '.csv'
+    path = 'resources/source_data/cleaner_data_' + month + '.csv'
     load_and_clean_data(filename).to_csv(path)
-
-
 
 # ratio = 0.35
 # data = load_and_clean_data('rijen_prosinec.xlsx')
@@ -75,3 +75,14 @@ def save_cleaner_data(filename):
 
 # save_cleaner_data('prosinec.xlsx')
 # save_cleaner_data('rijen.xlsm')
+
+#
+# a = '/Users/tomaye/Desktop/PersonalProjects/SURO/resources/source_data/data_rijen_prosinec.xls'
+# b = '/Users/tomaye/Desktop/PersonalProjects/SURO/resources/source_data/data_rijen_prosinec.xls'
+#
+# for i in range(len(a)):
+#     if a[i] != b[i]:
+#         print('-------------------')
+#         print(f'Char of a[{i}] = {a[i]}')
+#         print(f'Char of b[{i}] = {b[i]}')
+#         print('-------------------')

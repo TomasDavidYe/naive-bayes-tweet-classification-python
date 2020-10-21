@@ -3,10 +3,10 @@ import datetime
 from helper_methods import get_columns_for_word_aggregate_matrix
 
 
-occurrences_count_absolute = pd.read_csv('../resources/mentions/latest/occurrences_count_absolute.csv', names=['word_text', 'count'])
-occurrences_count_all = pd.read_csv('../resources/mentions/latest/occurrences_count_all.csv', names=['word_text', 'count'])
-occurrences_count_rel = pd.read_csv('../resources/mentions/latest/occurrences_count_rel.csv', names=['word_text', 'count'])
-occurrences_count_nerel = pd.read_csv('../resources/mentions/latest/occurrences_count_absolute.csv', names=['word_text', 'count'])
+occurrences_count_absolute = pd.read_csv('resources/mentions/latest/occurrences_count_absolute.csv', names=['word_text', 'count'])
+occurrences_count_all = pd.read_csv('resources/mentions/latest/occurrences_count_all.csv', names=['word_text', 'count'])
+occurrences_count_rel = pd.read_csv('resources/mentions/latest/occurrences_count_rel.csv', names=['word_text', 'count'])
+occurrences_count_nerel = pd.read_csv('resources/mentions/latest/occurrences_count_absolute.csv', names=['word_text', 'count'])
 
 
 ranked_abs = occurrences_count_absolute.rank(numeric_only=True, ascending=False)
@@ -55,6 +55,6 @@ def create_matrix_with_top_n_words(n):
                         ])
         aggregation_matrix_words = aggregation_matrix_words.append(row, ignore_index=True)
     time = datetime.datetime.now().strftime('%c').replace(' ', '_')
-    aggregation_matrix_words.to_csv('../resources/aggregation_matrices/words/aggregation_matrix_words_' + time + '.csv')
+    aggregation_matrix_words.to_csv('resources/aggregation_matrices/words/aggregation_matrix_words_' + time + '.csv')
 
 
