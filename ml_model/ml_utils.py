@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, confusion_matrix
 from matplotlib import pyplot as plt
@@ -9,17 +9,32 @@ from constants import WORKING_DIRECTORY, TEXT, RELEVANT
 from helper_methods import get_stop_words
 
 
-def run_optimisation(data):
+def run_optimisation(data, num_of_folds=3):
     X = data[TEXT]
     y = data[RELEVANT]
-    X_train, X_test, y_train, y_test = train_test_split(X,
-                                                        y,
-                                                        stratify=y,
-                                                        test_size=0.25)
-
     print(f'Percentage of relevant in FULL SET = {get_pctg_of_relevant_class(data[RELEVANT])}')
-    print(f'Percentage of relevant in TRAIN SET = {get_pctg_of_relevant_class(y_train)}')
-    print(f'Percentage of relevant in TEST SET = {get_pctg_of_relevant_class(y_test)}')
+    skf = StratifiedKFold(n_splits=num_of_folds)
+    fold_number = 0
+    for train_index, test_index in skf.split(X, y):
+        fold_number += 1
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        run_single_fold(X_train=X_train,
+                        X_test=X_test,
+                        y_train=y_train,
+                        y_test=y_test,
+                        fold_number=fold_number)
+
+
+
+
+
+def run_single_fold(X_train, X_test, y_train, y_test, fold_number):
+    print(f'-----------------------FOLD {fold_number} START-----------------------------------')
+    label_train = f'TRAIN_FOLD_{fold_number}'
+    label_test = f'TEST_FOLD_{fold_number}'
+    print(f'Percentage of relevant in {label_train} SET = {get_pctg_of_relevant_class(y_train)}')
+    print(f'Percentage of relevant in {label_test} SET = {get_pctg_of_relevant_class(y_test)}')
 
     vectorizer = fit_vectorizer(corpus=X_train)
     relevant_words = get_relevant_words(vectorizer=vectorizer, num_of_relevant_words=50)
@@ -27,27 +42,29 @@ def run_optimisation(data):
     feature_matrix_train = transform(vectorizer=vectorizer,
                                      data=X_train,
                                      relevant_words=relevant_words,
-                                     label='TRAIN')
+                                     label=label_train)
 
     feature_matrix_test = transform(vectorizer=vectorizer,
                                     data=X_test,
                                     relevant_words=relevant_words,
-                                    label='TEST')
+                                    label=label_test)
 
     classifier = train(feature_matrix_train, y_train)
 
-    train_predictions, train_probabilities = predict(classifier, feature_matrix_train, label='TRAIN')
-    test_predictions, test_probabilities = predict(classifier, feature_matrix_test, label='TEST')
+    train_predictions, train_probabilities = predict(classifier, feature_matrix_train, label=label_train)
+    test_predictions, test_probabilities = predict(classifier, feature_matrix_test, label=label_test)
 
     analyze_performance(ground_truth=y_train,
                         predictions=train_predictions,
                         probabilities=train_probabilities,
-                        label='TRAIN')
+                        label=label_train)
 
     analyze_performance(ground_truth=y_test,
                         predictions=test_predictions,
                         probabilities=test_probabilities,
-                        label='TEST')
+                        label=label_test)
+
+    print(f'-----------------------FOLD {fold_number} END-------------------------------------')
 
 
 def get_relevant_words(vectorizer, num_of_relevant_words=50):

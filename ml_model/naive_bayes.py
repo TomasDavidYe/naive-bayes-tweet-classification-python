@@ -15,6 +15,6 @@ num_of_rows = 4000
 sample_relevant = data[data[RELEVANT] == 1].iloc[:num_of_rows]
 sample_not_relevant = data[data[RELEVANT] == 0].iloc[:num_of_rows]
 
-optimisation_data = pd.concat([sample_relevant, sample_not_relevant])
+optimisation_data = pd.concat([sample_relevant, sample_not_relevant]).reset_index()
 
-run_optimisation(optimisation_data)
+run_optimisation(optimisation_data, num_of_folds=4)
