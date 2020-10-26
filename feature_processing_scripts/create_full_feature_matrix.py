@@ -3,8 +3,6 @@ from datetime import datetime
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 
-# import os
-# os.chdir(os.getcwd() + '/feature_processing_scripts')
 from constants import WORKING_DIRECTORY
 
 
@@ -244,6 +242,3 @@ def build_all_feature_matrices_for_given_month(filename):
     builder.add_word_indicator_features().save(month + '_word_indicator')
     builder.reset_matrix()
 
-#
-# build_all_feature_matrices_for_given_month('prosinec')
-# build_all_feature_matrices_for_given_month('rijen')
