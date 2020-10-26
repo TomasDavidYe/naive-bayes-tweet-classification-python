@@ -2,6 +2,8 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc
+from matplotlib import pyplot as plt
 
 from constants import WORKING_DIRECTORY, TEXT, RELEVANT
 from helper_methods import get_stop_words
@@ -37,11 +39,15 @@ def run_optimisation(data):
     train_predictions, train_probabilities = predict(classifier, feature_matrix_train, label='TRAIN')
     test_predictions, test_probabilities = predict(classifier, feature_matrix_test, label='TEST')
 
+    analyze_performance(ground_truth=y_train,
+                        predictions=train_predictions,
+                        probabilities=train_probabilities,
+                        label='TRAIN')
 
-
-
-
-
+    analyze_performance(ground_truth=y_test,
+                        predictions=test_predictions,
+                        probabilities=test_probabilities,
+                        label='TEST')
 
 
 def get_relevant_words(vectorizer, num_of_relevant_words=50):
@@ -80,8 +86,29 @@ def predict(classifier, data, label=''):
     return classifier.predict(data), classifier.predict_proba(data)[:, 1]
 
 
-def analyze_performance(ground_truth, predictions, label=''):
-    print(f'Analyzing performance for {label} SET...')
+def analyze_performance(ground_truth, predictions, probabilities, label=''):
+    print(f'------------------Performance Analysis for {label} SET Start--------------------')
+    print(f'Accuracy = {accuracy_score(ground_truth, predictions)}')
+    print(f'F1 Score = {f1_score(ground_truth, predictions)}')
+    fpr, tpr, thresholds = roc_curve(ground_truth, probabilities, pos_label=1)
+    area_under_roc_curve = auc(fpr, tpr)
+    plot_roc_curve(fpr, tpr, area_under_roc_curve, label)
+    print(f'Area under ROC curve = {area_under_roc_curve}')
+    print(f'------------------Performance Analysis for {label} SET End----------------------')
+
+
+def plot_roc_curve(fpr, tpr, area, label):
+    lw = 2
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=lw, label=f'ROC curve (area = {area:2f})')
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'ROC for {label} SET')
+    plt.legend(loc="lower right")
+    plt.show()
 
 
 def calculate_test_probability(test_case_index, X_matrix, words, classifier):

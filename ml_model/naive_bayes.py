@@ -8,7 +8,13 @@ data = full_dataset[['id']]
 data[TEXT] = full_dataset['Obsah zmínek']
 data[RELEVANT] = full_dataset['Štítek'].map(lambda x: int(x == 'rel'))
 data = data.drop_duplicates(subset=['id'])
+data.dropna(inplace=True)
 
-num_of_rows = 100
+num_of_rows = 4000
 
-run_optimisation(data.loc[:num_of_rows - 1, :])
+sample_relevant = data[data[RELEVANT] == 1].iloc[:num_of_rows]
+sample_not_relevant = data[data[RELEVANT] == 0].iloc[:num_of_rows]
+
+optimisation_data = pd.concat([sample_relevant, sample_not_relevant])
+
+run_optimisation(optimisation_data)
