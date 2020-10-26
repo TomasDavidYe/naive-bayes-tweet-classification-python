@@ -12,6 +12,11 @@ def rename_columns_for_feature_matrix(matrix, tokens) -> pd.DataFrame:
     doc_names = ['mention_{:d}'.format(i + 2) for i, value in enumerate(matrix)]
     return pd.DataFrame(data=matrix, index=doc_names, columns=tokens).transpose()
 
+
+def rename_columns_for_feature_matrix_with_index(matrix, tokens, index) -> pd.DataFrame:
+    return pd.DataFrame(data=matrix, index=index, columns=tokens).transpose()
+
+
 def get_indicator_matrix(feature_matrix):
     return feature_matrix.apply(lambda x: x > 0).astype(dtype=int)
 
@@ -40,14 +45,15 @@ def get_data_for_vectorization(month, ratio):
     dataset = pd.read_csv(source_path).set_index('id')
     dataset.sort_values(by='Datum vytvoření', inplace=True)
     train_length = int(len(dataset) * ratio)
-    temp = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
+    temp = dataset[['Obsah zmínek', 'Štítek']].dropna().apply(
+        func=lambda x: tag_with_relevance(x['Obsah zmínek'], x['Štítek']), axis=1)
     train_set = temp.iloc[:train_length]
     test_set = temp.iloc[train_length:]
     return [train_set, test_set]
 
 
 def get_feature_matrix(month, ratio):
-    [mentions_train, mentions_test] = get_data_for_vectorization(month ,ratio)
+    [mentions_train, mentions_test] = get_data_for_vectorization(month, ratio)
     print('Creating stop words list')
     stop_words_cz = get_stop_words()
     vectorizer = CountVectorizer(stop_words=stop_words_cz)
@@ -89,7 +95,6 @@ def vectorize(month, ratio=1.0):
     occurrences_count_rel.rename('count')
     occurrences_count_nerel.rename('count')
 
-
     print('Archiving')
     archive_matrix(occurrences_count_absolute, month, 'occurrences_count_absolute', ratio)
     archive_matrix(occurrences_count_absolute, month, 'occurrences_count_all', ratio)
@@ -112,6 +117,5 @@ def archive_matrix(matrix, month, file_name, ratio):
     suffix = '_ratio_' + str(ratio) + '.csv'
     path = os.path.join(dir_name, file_name + suffix)
     matrix.to_csv(path)
-
 
 # vectorize('prosinec', 0.7)
