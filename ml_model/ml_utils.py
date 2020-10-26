@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc
+from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, confusion_matrix
 from matplotlib import pyplot as plt
 
 from constants import WORKING_DIRECTORY, TEXT, RELEVANT
@@ -94,6 +94,9 @@ def analyze_performance(ground_truth, predictions, probabilities, label=''):
     area_under_roc_curve = auc(fpr, tpr)
     plot_roc_curve(fpr, tpr, area_under_roc_curve, label)
     print(f'Area under ROC curve = {area_under_roc_curve}')
+    tn, fp, fn, tp = confusion_matrix(ground_truth, predictions).ravel()
+    print(f'TP = {tp}, FP = {fp}')
+    print(f'FN = {fn}, TN = {tn}')
     print(f'------------------Performance Analysis for {label} SET End----------------------')
 
 
