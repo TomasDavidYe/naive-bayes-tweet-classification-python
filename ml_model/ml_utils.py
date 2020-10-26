@@ -31,6 +31,8 @@ def run_optimisation(data, num_of_folds=3):
 
 def run_single_fold(X_train, X_test, y_train, y_test, fold_number):
     print(f'-----------------------FOLD {fold_number} START-----------------------------------')
+    print(f'Train set size = {len(X_train)}')
+    print(f'Test set size = {len(X_test)}')
     label_train = f'TRAIN_FOLD_{fold_number}'
     label_test = f'TEST_FOLD_{fold_number}'
     print(f'Percentage of relevant in {label_train} SET = {get_pctg_of_relevant_class(y_train)}')
