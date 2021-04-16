@@ -39,7 +39,7 @@ def run_single_fold(X_train, X_test, y_train, y_test, fold_number):
     print(f'Percentage of relevant in {label_test} SET = {get_pctg_of_relevant_class(y_test)}')
 
     vectorizer = fit_vectorizer(corpus=X_train)
-    relevant_words = get_relevant_words(vectorizer=vectorizer, num_of_relevant_words=50)
+    relevant_words = get_relevant_words(vectorizer=vectorizer, num_of_relevant_words=1000)
 
     feature_matrix_train = transform(vectorizer=vectorizer,
                                      data=X_train,
