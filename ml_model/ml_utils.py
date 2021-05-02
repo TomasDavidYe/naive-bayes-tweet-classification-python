@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, confusion_matrix
 from matplotlib import pyplot as plt
@@ -11,7 +11,7 @@ from constants import WORKING_DIRECTORY, TEXT, RELEVANT
 from helper_methods import get_stop_words
 
 
-def run_optimisation(data, num_of_folds=3, threshold=0.5):
+def run_optimisation(data, num_of_folds=3, threshold=0.5, max_features=100):
     X = data[TEXT]
     y = data[RELEVANT]
     print(f'Percentage of relevant in FULL SET = {get_pctg_of_relevant_class(data[RELEVANT])}')
@@ -27,11 +27,12 @@ def run_optimisation(data, num_of_folds=3, threshold=0.5):
             y_train=y_train,
             y_test=y_test,
             fold_number=fold_number,
-            threshold=threshold
+            threshold=threshold,
+            max_features=max_features
         )
 
 
-def run_single_fold(X_train, X_test, y_train, y_test, fold_number, threshold=0.5):
+def run_single_fold(X_train, X_test, y_train, y_test, fold_number, threshold=0.5, max_features=100):
     print(f'-----------------------FOLD {fold_number} START-----------------------------------')
     print(f'Train set size = {len(X_train)}')
     print(f'Test set size = {len(X_test)}')
@@ -40,18 +41,21 @@ def run_single_fold(X_train, X_test, y_train, y_test, fold_number, threshold=0.5
     print(f'Percentage of relevant in {label_train} SET = {get_pctg_of_relevant_class(y_train)}')
     print(f'Percentage of relevant in {label_test} SET = {get_pctg_of_relevant_class(y_test)}')
 
-    vectorizer = fit_vectorizer(corpus=X_train)
-    relevant_words = get_relevant_words(vectorizer=vectorizer, num_of_relevant_words=1000)
+    vectorizer, features = fit_vectorizer(corpus=X_train, max_features=max_features)
 
-    feature_matrix_train = transform(vectorizer=vectorizer,
-                                     data=X_train,
-                                     relevant_words=relevant_words,
-                                     label=label_train)
+    feature_matrix_train = build_feature_matrix(
+        vectorizer=vectorizer,
+        data=X_train,
+        label=label_train,
+        features=features
+    )
 
-    feature_matrix_test = transform(vectorizer=vectorizer,
-                                    data=X_test,
-                                    relevant_words=relevant_words,
-                                    label=label_test)
+    feature_matrix_test = build_feature_matrix(
+        vectorizer=vectorizer,
+        data=X_test,
+        label=label_test,
+        features=features
+    )
 
     classifier = train(feature_matrix_train, y_train)
 
@@ -94,16 +98,15 @@ def run_single_fold(X_train, X_test, y_train, y_test, fold_number, threshold=0.5
     print(f'-----------------------FOLD {fold_number} END-------------------------------------')
 
 
-def get_relevant_words(vectorizer, num_of_relevant_words=50):
-    print('Constructing relevant vocabulary...')
-    return list(set(get_n_most_used_words(num_of_relevant_words)).intersection(set(vectorizer.get_feature_names())))
-
-
-def fit_vectorizer(corpus):
-    print('Fitting vectorizer...')
+def fit_vectorizer(corpus, max_features):
+    print(f'Fitting vectorizer with MAX_WORD_FEATURES = {max_features}')
     vectorizer = CountVectorizer(stop_words=get_stop_words())
     vectorizer.fit(raw_documents=corpus)
-    return vectorizer
+    matrix = vectorizer.transform(corpus).todense()
+    full_feature_matrix = pd.DataFrame(data=matrix, index=corpus.index, columns=vectorizer.get_feature_names())
+    sorted_summed = full_feature_matrix.apply(func=np.sum, axis=0).sort_values(ascending=False)
+    column_list = list(sorted_summed[:max_features].index)
+    return vectorizer, column_list
 
 
 def train(features, target):
@@ -114,13 +117,15 @@ def train(features, target):
     return classifier
 
 
-def transform(vectorizer, data, relevant_words, label=''):
+def build_feature_matrix(vectorizer, data, features, label=''):
     print(f'Crating feature matrix for {label} SET...')
     feature_matrix_raw = vectorizer.transform(data).todense()
-    feature_matrix = rename_columns_for_feature_matrix_with_index(matrix=feature_matrix_raw,
-                                                                  vectorizer=vectorizer,
-                                                                  index=data.index,
-                                                                  relevant_words=relevant_words)
+    feature_matrix = rename_columns_for_feature_matrix_with_index(
+        matrix=feature_matrix_raw,
+        vectorizer=vectorizer,
+        index=data.index,
+        features=features
+    )
 
     return feature_matrix
 
@@ -200,15 +205,16 @@ def calculate_test_probability(test_case_index, X_matrix, words, classifier):
     print(f'P(Y = 1 | X) = {p_class_1_x}')
 
 
-def get_n_most_used_words(n):
-    return list(
-        pd.read_csv(
-            WORKING_DIRECTORY + '/resources/word_vectorization_matrices/rijen_prosinec/latest/occurrences_count_absolute.csv')[
-            'Unnamed: 0'][:n])
 
+def rename_columns_for_feature_matrix_with_index(matrix, vectorizer, index, features):
+    full_feature_matrix = pd.DataFrame(
+        data=matrix,
+        index=index,
+        columns=vectorizer.get_feature_names()
+    )
 
-def rename_columns_for_feature_matrix_with_index(matrix, vectorizer, index, relevant_words):
-    return pd.DataFrame(data=matrix, index=index, columns=vectorizer.get_feature_names())[relevant_words]
+    result = full_feature_matrix[features]
+    return result
 
 
 def get_pctg_of_relevant_class(s):

@@ -16,8 +16,8 @@ def get_columns_for_word_aggregate_matrix():
 
 
 def get_stop_words():
-    stop_words_new = pd.read_excel(WORKING_DIRECTORY + '/resources/source_data/stop_words_13_12_2018.xlsx')['word'].to_dict().values()
-    result = list(set(stop_words_new))
+    stop_words = pd.read_csv('./resources/source_data/stop_words.csv', header=None)
+    result = list(set(stop_words[0]))
     result.sort()
     return result
 

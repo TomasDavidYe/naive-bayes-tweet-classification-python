@@ -1,18 +1,13 @@
 import pandas as pd
 
-from constants import WORKING_DIRECTORY, TEXT, RELEVANT
+from constants import RELEVANT
 from ml_model.ml_utils import run_optimisation
 
 
-def run(num_folds: int, classification_threshold: float):
-    full_dataset = pd.read_csv(WORKING_DIRECTORY + '/resources/source_data/cleaner_data_rijen_prosinec.csv')
-    data = full_dataset[['id']].copy()
-    data[TEXT] = full_dataset['Obsah zmínek']
-    data[RELEVANT] = full_dataset['Štítek'].map(lambda x: int(x == 'rel'))
-    data = data.drop_duplicates(subset=['id'])
-    data.dropna(inplace=True)
-
+def run(num_folds: int, classification_threshold: float, max_word_features: int):
     num_of_rows = 4000
+    data = pd.read_csv('./resources/source_data/posts.csv')
+
     sample_relevant = data[data[RELEVANT] == 1].iloc[:num_of_rows]
     sample_not_relevant = data[data[RELEVANT] == 0].iloc[:num_of_rows]
 
@@ -21,5 +16,6 @@ def run(num_folds: int, classification_threshold: float):
     run_optimisation(
         data=optimisation_data,
         num_of_folds=num_folds,
-        threshold=classification_threshold
+        threshold=classification_threshold,
+        max_features=max_word_features,
     )
