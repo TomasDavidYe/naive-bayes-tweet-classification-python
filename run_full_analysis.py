@@ -19,7 +19,7 @@ if __name__ == '__main__':
         posts=get_posts(),
         stop_words=get_stop_words()
     ).run_analysis(
-        num_of_folds=2,
-        classification_threshold=0.65,
-        max_word_features=50
+        num_of_folds=3,
+        classification_threshold=0.6,
+        max_word_features=200
     )

@@ -44,7 +44,17 @@ NaiveBayes(
 )
 ```  
 
+# Meta Parameter Tunning
+From plotting the ROC curve on multiple examples, it became clear that the default decision threshold of 0.5 is not optimal.  
+![](https://i.imgur.com/3ZvUsOv.png)
 
-# Accuracy
- 
+By running different experiments on multiple stratified datasets and have found that a good value of the decision threshold for the specific Czech problem is **0.6**
+
+### Default Threshold of 0.5
+![](https://i.imgur.com/XfN2KOT.png)
+
+### Experimentally verified Threshold of 0.6
+![](https://i.imgur.com/AVXMFTj.png)
+  
+
 
