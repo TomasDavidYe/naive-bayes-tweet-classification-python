@@ -125,13 +125,13 @@ class NaiveBayes:
         vectorizer = CountVectorizer(stop_words=self.stop_words)
         vectorizer.fit(raw_documents=corpus)
 
-        # TODO Remove the hardcoded list -> This is just to speed up the computation during refactoring
-        # matrix = vectorizer.transform(corpus).todense()
-        # full_feature_matrix = pd.DataFrame(data=matrix, index=corpus.index, columns=vectorizer.get_feature_names())
-        # sorted_summed = full_feature_matrix.apply(func=np.sum, axis=0).sort_values(ascending=False)
-        # column_list = list(sorted_summed[:max_features].index)
+        matrix = vectorizer.transform(corpus).todense()
+        full_feature_matrix = pd.DataFrame(data=matrix, index=corpus.index, columns=vectorizer.get_feature_names())
+        sorted_summed = full_feature_matrix.apply(func=np.sum, axis=0).sort_values(ascending=False)
+        column_list = list(sorted_summed[:max_features].index)
 
-        column_list = TOP_50_WORD_LIST
+        # Use this if you wanna speed the vectorization
+        # column_list = TOP_50_WORD_LIST
 
         return vectorizer, column_list
 
