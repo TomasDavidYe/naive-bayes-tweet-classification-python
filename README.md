@@ -1,8 +1,8 @@
 # About
-This package contains code which applies [**SciKit Learn's NaiveBayes**](https://scikit-learn.org/stable/modules/naive_bayes.html#gaussian-naive-bayes) to internet posts into 2 categories.
-I built this package as a member of a university team when was analyzing twitter posts and tried to answer the question: “How do Czech people view nuclear energy?". 
+This package contains code which applies [**SciKit Learn's NaiveBayes**](https://scikit-learn.org/stable/modules/naive_bayes.html#gaussian-naive-bayes) to a dataset of text posts and is able to categorize them into 2 categories.
+I originally built this package as a member of a university team when I was analyzing twitter posts and tried to answer the question: “How do Czech people view nuclear energy?". 
 
-I encapsulated the main logic into the [**NaiveBayes**](./model/NaiveBayes.py) class and this can be used to solve any similar text classification problem.
+Now, I encapsulated the main logic into the [**NaiveBayes**](./model/NaiveBayes.py) class so the algorithm can be used to solve any similar text classification problem.
 The original data is attached so you can quickly run an experiment yourself or you can feed it with your own data.
 
 # Input Data
