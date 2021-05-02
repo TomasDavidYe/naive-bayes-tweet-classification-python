@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
@@ -9,7 +11,7 @@ from constants import WORKING_DIRECTORY, TEXT, RELEVANT
 from helper_methods import get_stop_words
 
 
-def run_optimisation(data, num_of_folds=3):
+def run_optimisation(data, num_of_folds=3, threshold=0.5):
     X = data[TEXT]
     y = data[RELEVANT]
     print(f'Percentage of relevant in FULL SET = {get_pctg_of_relevant_class(data[RELEVANT])}')
@@ -19,17 +21,17 @@ def run_optimisation(data, num_of_folds=3):
         fold_number += 1
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
-        run_single_fold(X_train=X_train,
-                        X_test=X_test,
-                        y_train=y_train,
-                        y_test=y_test,
-                        fold_number=fold_number)
+        run_single_fold(
+            X_train=X_train,
+            X_test=X_test,
+            y_train=y_train,
+            y_test=y_test,
+            fold_number=fold_number,
+            threshold=threshold
+        )
 
 
-
-
-
-def run_single_fold(X_train, X_test, y_train, y_test, fold_number):
+def run_single_fold(X_train, X_test, y_train, y_test, fold_number, threshold=0.5):
     print(f'-----------------------FOLD {fold_number} START-----------------------------------')
     print(f'Train set size = {len(X_train)}')
     print(f'Test set size = {len(X_test)}')
@@ -53,18 +55,41 @@ def run_single_fold(X_train, X_test, y_train, y_test, fold_number):
 
     classifier = train(feature_matrix_train, y_train)
 
-    train_predictions, train_probabilities = predict(classifier, feature_matrix_train, label=label_train)
-    test_predictions, test_probabilities = predict(classifier, feature_matrix_test, label=label_test)
+    train_predictions_default, train_predictions_threshold, train_probabilities = predict(
+        classifier=classifier,
+        data=feature_matrix_train,
+        label=label_train,
+        threshold=threshold
+    )
 
+    test_predictions_default, test_predictions_threshold, test_probabilities = predict(
+        classifier=classifier,
+        data=feature_matrix_test,
+        label=label_test,
+        threshold=threshold
+    )
+
+    # Default Threshold = 0.5
     analyze_performance(ground_truth=y_train,
-                        predictions=train_predictions,
+                        predictions=train_predictions_default,
                         probabilities=train_probabilities,
-                        label=label_train)
+                        label=f'{label_train} with DEFAULT THRESHOLD = 0.5')
 
     analyze_performance(ground_truth=y_test,
-                        predictions=test_predictions,
+                        predictions=test_predictions_default,
                         probabilities=test_probabilities,
-                        label=label_test)
+                        label=f'{label_test} with DEFAULT THRESHOLD = 0.5')
+
+    # Selected Threshold
+    analyze_performance(ground_truth=y_train,
+                        predictions=train_predictions_threshold,
+                        probabilities=train_probabilities,
+                        label=f'{label_train} with SELECTED THRESHOLD = {threshold}')
+
+    analyze_performance(ground_truth=y_test,
+                        predictions=test_predictions_threshold,
+                        probabilities=test_probabilities,
+                        label=f'{label_test} with SELECTED THRESHOLD = {threshold}')
 
     print(f'-----------------------FOLD {fold_number} END-------------------------------------')
 
@@ -100,9 +125,12 @@ def transform(vectorizer, data, relevant_words, label=''):
     return feature_matrix
 
 
-def predict(classifier, data, label=''):
+def predict(classifier, data, label='', threshold: float = 0.5):
     print(f'calculating predictions for for {label} SET...')
-    return classifier.predict(data), classifier.predict_proba(data)[:, 1]
+    probabilities: np.ndarray = classifier.predict_proba(data)[:, 1]
+    default_predictions = classifier.predict(data)
+    threshold_predictions = (probabilities > threshold).astype(int)
+    return default_predictions, threshold_predictions, probabilities
 
 
 def analyze_performance(ground_truth, predictions, probabilities, label=''):

@@ -6,7 +6,7 @@ In this repository, the code implementing a Naive Bayes predictor of post releva
 
 
 # Problem Statement
-TODO
+Given
 
 
 # Project Structure
