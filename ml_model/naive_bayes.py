@@ -4,7 +4,7 @@ from constants import WORKING_DIRECTORY, TEXT, RELEVANT
 from ml_model.ml_utils import run_optimisation
 
 
-def run(num_folds: int, decision_threshold: float):
+def run(num_folds: int, classification_threshold: float):
     full_dataset = pd.read_csv(WORKING_DIRECTORY + '/resources/source_data/cleaner_data_rijen_prosinec.csv')
     data = full_dataset[['id']].copy()
     data[TEXT] = full_dataset['Obsah zmínek']
@@ -21,5 +21,5 @@ def run(num_folds: int, decision_threshold: float):
     run_optimisation(
         data=optimisation_data,
         num_of_folds=num_folds,
-        threshold=decision_threshold
+        threshold=classification_threshold
     )

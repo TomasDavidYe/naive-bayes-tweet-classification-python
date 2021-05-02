@@ -138,6 +138,11 @@ def analyze_performance(ground_truth, predictions, probabilities, label=''):
     print(f'Accuracy = {accuracy_score(ground_truth, predictions)}')
     print(f'F1 Score = {f1_score(ground_truth, predictions)}')
     fpr, tpr, thresholds = roc_curve(ground_truth, probabilities, pos_label=1)
+    # calculate the g-mean for each threshold
+    gmeans = np.sqrt(tpr * (1 - fpr))
+    # locate the index of the largest g-mean
+    ix = np.argmax(gmeans)
+    print('Best Threshold=%f, G-Mean=%.3f' % (thresholds[ix], gmeans[ix]))
     area_under_roc_curve = auc(fpr, tpr)
     plot_roc_curve(fpr, tpr, area_under_roc_curve, label)
     print(f'Area under ROC curve = {area_under_roc_curve}')
