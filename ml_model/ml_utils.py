@@ -7,8 +7,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, confusion_matrix
 from matplotlib import pyplot as plt
 
-from constants import WORKING_DIRECTORY, TEXT, RELEVANT
-from helper_methods import get_stop_words
+from constants import TEXT, RELEVANT, TOP_50_WORD_LIST
 
 
 def run_optimisation(data, num_of_folds=3, threshold=0.5, max_features=100):
@@ -102,10 +101,15 @@ def fit_vectorizer(corpus, max_features):
     print(f'Fitting vectorizer with MAX_WORD_FEATURES = {max_features}')
     vectorizer = CountVectorizer(stop_words=get_stop_words())
     vectorizer.fit(raw_documents=corpus)
-    matrix = vectorizer.transform(corpus).todense()
-    full_feature_matrix = pd.DataFrame(data=matrix, index=corpus.index, columns=vectorizer.get_feature_names())
-    sorted_summed = full_feature_matrix.apply(func=np.sum, axis=0).sort_values(ascending=False)
-    column_list = list(sorted_summed[:max_features].index)
+
+    # TODO Remove the hardcoded list
+    # matrix = vectorizer.transform(corpus).todense()
+    # full_feature_matrix = pd.DataFrame(data=matrix, index=corpus.index, columns=vectorizer.get_feature_names())
+    # sorted_summed = full_feature_matrix.apply(func=np.sum, axis=0).sort_values(ascending=False)
+    # column_list = list(sorted_summed[:max_features].index)
+
+    column_list = TOP_50_WORD_LIST
+
     return vectorizer, column_list
 
 
@@ -223,3 +227,10 @@ def get_pctg_of_relevant_class(s):
     irrelevant_samples_count = len(s[s == 0])
     pctg_rel = 100 * relevant_samples_count / all_samples_count
     return pctg_rel
+
+
+def get_stop_words():
+    stop_words = pd.read_csv('data/stop_words.csv', header=None)
+    result = list(set(stop_words[0]))
+    result.sort()
+    return result
